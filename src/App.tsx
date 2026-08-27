@@ -285,6 +285,7 @@ export function App() {
             user={currentUser}
             skills={skills}
             idpHistory={idpHistory}
+            activeIdp={activeIdp}
             initialSubTab={profileSubTab}
           />
         )}
