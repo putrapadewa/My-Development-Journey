@@ -10,7 +10,7 @@ import {
   Shield,
   Trash2,
   ExternalLink,
-  Compass,
+  Sprout,
   ArrowRight,
   Target,
 } from 'lucide-react';
@@ -186,69 +186,51 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
   // ─── WELCOME VIEW ───────────────────────────────────────────────────────────
   if (journeyView === 'WELCOME') {
     return (
-      <div className="min-h-[72vh] flex items-center justify-center pb-12">
-        <div className="max-w-2xl w-full mx-auto">
-          <div className="rounded-3xl bg-gradient-to-br from-indigo-900 via-indigo-800 to-slate-900 text-white p-10 sm:p-14 shadow-2xl border border-indigo-700/40 text-center relative overflow-hidden">
-            {/* Background glows */}
-            <div className="absolute -top-24 -right-24 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-
-            <div className="relative z-10">
-              {/* Icon */}
-              <div className="flex justify-center mb-7">
-                <div className="w-24 h-24 rounded-3xl bg-amber-400/20 border border-amber-400/30 flex items-center justify-center shadow-lg">
-                  <Compass className="w-12 h-12 text-amber-400" />
-                </div>
-              </div>
-
-              {/* Title */}
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-white leading-tight">
-                Ayo Buat My Development Journey!
-              </h2>
-
-              {/* Motivational quote */}
-              <blockquote className="mt-5 text-sm text-indigo-200/80 italic leading-relaxed max-w-lg mx-auto border-l-2 border-amber-400/40 pl-4 text-left">
-                "An investment in knowledge pays the best interest."
-                <br />
-                <span className="text-indigo-300/60 not-italic text-xs font-medium">— Benjamin Franklin</span>
-              </blockquote>
-
-              {/* Description */}
-              <p className="mt-6 text-sm text-indigo-200/90 leading-relaxed max-w-md mx-auto">
-                AI akan menganalisa profil, skill gaps, dan tujuan kariermu untuk menyusun rencana pengembangan yang dipersonalisasi menggunakan framework{' '}
-                <strong className="text-amber-300">70:20:10</strong>.
-              </p>
-
-              {/* Feature pills */}
-              <div className="flex flex-wrap justify-center gap-2 mt-5">
-                {['Analisa Skill Gaps', 'Rekomendasi Programme', 'Framework 70:20:10', 'Dipersonalisasi AI'].map((f) => (
-                  <span key={f} className="text-[11px] font-semibold px-3 py-1 rounded-full bg-white/10 border border-white/20 text-indigo-100">
-                    {f}
-                  </span>
-                ))}
-              </div>
-
-              {/* CTA */}
-              <button
-                onClick={() => setJourneyView('AI_SETUP')}
-                className="mt-9 inline-flex items-center gap-2.5 px-9 py-4 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-sm shadow-lg transition-all cursor-pointer"
-              >
-                <Sparkles className="w-4 h-4 fill-slate-950" />
-                Mulai Journey Saya
-                <ArrowRight className="w-4 h-4" />
-              </button>
-
-              {/* Skip if already has activities */}
-              {activities.length > 0 && (
-                <button
-                  onClick={() => setJourneyView('JOURNEY')}
-                  className="mt-4 block mx-auto text-xs text-indigo-300/70 hover:text-indigo-200 transition-colors underline cursor-pointer"
-                >
-                  Lihat journey yang sudah ada ({activities.length} aktivitas) →
-                </button>
-              )}
+      <div className="pb-12">
+        <div className="rounded-3xl bg-white border border-slate-200 shadow-lg p-10 sm:p-14 text-center">
+          {/* Icon */}
+          <div className="flex justify-center mb-7">
+            <div className="w-24 h-24 rounded-3xl bg-emerald-50 border border-emerald-200 flex items-center justify-center shadow-sm">
+              <Sprout className="w-12 h-12 text-emerald-500" />
             </div>
           </div>
+
+          {/* Title */}
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-800 leading-tight">
+            Ayo Buat My Development Journey!
+          </h2>
+
+          {/* Motivational quote */}
+          <blockquote className="mt-5 text-sm text-slate-500 italic leading-relaxed max-w-lg mx-auto border-l-2 border-emerald-300 pl-4 text-left">
+            "An investment in knowledge pays the best interest."
+            <br />
+            <span className="text-slate-400 not-italic text-xs font-medium">— Benjamin Franklin</span>
+          </blockquote>
+
+          {/* Description */}
+          <p className="mt-6 text-sm text-slate-600 leading-relaxed max-w-md mx-auto">
+            AI akan menganalisa profil, skill gaps, dan tujuan kariermu untuk menyusun rencana pengembangan yang dipersonalisasi menggunakan framework{' '}
+            <strong className="text-indigo-600">70:20:10</strong>.
+          </p>
+
+          {/* Feature pills */}
+          <div className="flex flex-wrap justify-center gap-2 mt-5">
+            {['Analisa Skill Gaps', 'Rekomendasi Programme', 'Framework 70:20:10', 'Dipersonalisasi AI'].map((f) => (
+              <span key={f} className="text-[11px] font-semibold px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600">
+                {f}
+              </span>
+            ))}
+          </div>
+
+          {/* CTA */}
+          <button
+            onClick={() => setJourneyView('AI_SETUP')}
+            className="mt-9 inline-flex items-center gap-2.5 px-9 py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm shadow-lg transition-all cursor-pointer"
+          >
+            <Sparkles className="w-4 h-4" />
+            Mulai Journey Saya
+            <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
       </div>
     );
