@@ -1,0 +1,10 @@
+{
+  "buildCommand": "npm run build:frontend",
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/api/gemini/recommendations", "destination": "/api/gemini/recommendations" },
+    { "source": "/api/gemini/coach", "destination": "/api/gemini/coach" },
+    { "source": "/api/gemini/assess-skill", "destination": "/api/gemini/assess-skill" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

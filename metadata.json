@@ -1,0 +1,6 @@
+{
+  "name": "My Development Journey (MDJ)",
+  "description": "An AI-powered Individual Development Plan and Skill Growth platform transforming employee growth from a static form into a personalized, 70:20:10 development journey.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
