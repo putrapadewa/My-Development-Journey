@@ -63,6 +63,7 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
   const [aiStrengths, setAiStrengths] = useState('');
   const [aiPeriod, setAiPeriod] = useState('2026 H1 (Jan - Jun 2026)');
   const [isAiSetupLoading, setIsAiSetupLoading] = useState(false);
+  const [aiSetupError, setAiSetupError] = useState('');
 
   // AI Review states
   const [pendingActivities, setPendingActivities] = useState<DevelopmentActivity[]>([]);
@@ -123,6 +124,7 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
 
   const handleGenerateAI = async () => {
     setIsAiSetupLoading(true);
+    setAiSetupError('');
     try {
       const response = await fetch('/api/gemini/recommendations', {
         method: 'POST',
@@ -141,7 +143,16 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
         }),
       });
 
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error((errData as any).error || `Server error ${response.status}`);
+      }
+
       const data = await response.json();
+
+      if (!data.recommendedActivities || data.recommendedActivities.length === 0) {
+        throw new Error('AI tidak menghasilkan rekomendasi. Coba lagi atau ubah input.');
+      }
 
       const mappedActivities: DevelopmentActivity[] = (data.recommendedActivities || []).map(
         (rec: any, idx: number) => ({
@@ -171,6 +182,7 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
       setJourneyView('AI_REVIEW');
     } catch (err) {
       console.error('AI generation error:', err);
+      setAiSetupError(err instanceof Error ? err.message : 'Terjadi kesalahan. Coba lagi.');
       setJourneyView('AI_SETUP');
     } finally {
       setIsAiSetupLoading(false);
@@ -394,6 +406,14 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
                 AI akan menyusun <strong>minimum 5 aktivitas</strong> dengan komposisi ideal: 70% Experience (Action Project), 20% Exposure (Mentoring/Shadowing), dan 10% Formal Learning (Pelatihan/Kursus).
               </p>
             </div>
+
+            {/* Error Banner */}
+            {aiSetupError && (
+              <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-red-50 border border-red-200">
+                <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                <p className="text-xs text-red-800 leading-relaxed">{aiSetupError}</p>
+              </div>
+            )}
 
             {/* Action Buttons */}
             <div className="flex items-center justify-between pt-1">
