@@ -12,8 +12,8 @@ import {
 export const INITIAL_USER_PROFILE: UserProfile = {
   id: 'usr-001',
   employeeId: 'TC-98421',
-  name: 'Putra Padewa',
-  email: 'putra.padewa@techconnect.co.id',
+  name: 'Christina',
+  email: 'christina@techconnect.co.id',
   avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
   position: 'Lead Cloud Solutions Architect & Tech Lead',
   level: 'Principal / Lead (L5)',
@@ -951,7 +951,7 @@ export const INITIAL_CATALOGUE: CatalogueProgram[] = [
 export const INITIAL_IDP: IndividualDevelopmentPlan = {
   id: 'idp-2026-001',
   employeeId: 'usr-001',
-  employeeName: 'Putra Padewa',
+  employeeName: 'Christina',
   period: '2026 H1 - Strategic Capability & Enterprise AI Architecture',
   status: 'IN_PROGRESS',
   primaryObjective: 'Elevate architectural governance to enterprise level while mastering Agentic AI and executive influence to prepare for Head of Enterprise Architecture role.',
@@ -1038,7 +1038,7 @@ export const INITIAL_IDP_HISTORY: IndividualDevelopmentPlan[] = [
   {
     id: 'idp-2025-002',
     employeeId: 'usr-001',
-    employeeName: 'Putra Padewa',
+    employeeName: 'Christina',
     period: '2025 H2 - Cloud Modernization & FinOps Leadership',
     status: 'VALIDATED',
     primaryObjective: 'Standardize cloud governance across BUs and reduce infrastructure overhead.',
@@ -1085,7 +1085,7 @@ export const INITIAL_CAREER_PROFILE: CareerProfile = {
 
 export const INITIAL_GROW_CARD: GrowCardData = {
   employeeId: 'usr-001',
-  employeeName: 'Putra Padewa',
+  employeeName: 'Christina',
   position: 'Lead Cloud Solutions Architect',
   businessUnit: 'Digital Transformation & Enterprise Cloud BU',
   aspiration: 'Head of Enterprise Architecture & Cloud Engineering',
@@ -1119,12 +1119,12 @@ export const INITIAL_AUDIT_LOGS: AuditLogEntry[] = [
     actorName: 'Anindya Kirana',
     role: 'Employee',
     action: 'IDP_SUBMISSION',
-    details: 'Submitted proposed 2026 H1 Individual Development Plan to manager Putra Padewa.',
+    details: 'Submitted proposed 2026 H1 Individual Development Plan to manager Christina.',
   },
   {
     id: 'log-02',
     timestamp: '2026-02-22 17:30:45',
-    actorName: 'Putra Padewa',
+    actorName: 'Christina',
     role: 'Employee',
     action: 'ACTIVITY_COMPLETED',
     details: 'Completed "Agentic AI Architecture with Gemini & Vector Governance" with capstone evidence.',
@@ -1135,12 +1135,12 @@ export const INITIAL_AUDIT_LOGS: AuditLogEntry[] = [
     actorName: 'Rian Pratama',
     role: 'Manager',
     action: 'IDP_APPROVED',
-    details: 'Approved 2026 H1 IDP for Putra Padewa with full budget allocation.',
+    details: 'Approved 2026 H1 IDP for Christina with full budget allocation.',
   },
   {
     id: 'log-04',
     timestamp: '2026-01-18 09:30:22',
-    actorName: 'Putra Padewa',
+    actorName: 'Christina',
     role: 'Employee',
     action: 'IDP_SUBMISSION',
     details: 'Generated and curated 70:20:10 AI development proposal and submitted for manager approval.',
