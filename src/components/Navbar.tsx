@@ -91,22 +91,21 @@ export const Navbar: React.FC<NavbarProps> = ({
               </h1>
             </div>
 
-            {/* Home / Bento Dashboard button sejajar dengan judul */}
+            {/* Home button */}
             {onNavigate && (
               <button
                 type="button"
-                id="nav-home-bento-btn"
-                onClick={() => onNavigate('home')}
-                title="Bento Dashboard / Home"
+                id="nav-home-btn"
+                onClick={() => onNavigate('journey')}
+                title="My Development Journey"
                 className={`flex items-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer border ${
-                  activeTab === 'home'
+                  activeTab === 'journey'
                     ? 'bg-indigo-900 text-white shadow-xs border-indigo-800'
                     : 'bg-slate-100/90 hover:bg-slate-200/80 text-slate-700 hover:text-slate-950 border-slate-200/80'
                 }`}
               >
-                <Home className={`w-3.5 h-3.5 ${activeTab === 'home' ? 'text-indigo-200' : 'text-slate-500'}`} />
-                <span className="hidden md:inline">Home / Bento Dashboard</span>
-                <span className="inline md:hidden">Home</span>
+                <Home className={`w-3.5 h-3.5 ${activeTab === 'journey' ? 'text-indigo-200' : 'text-slate-500'}`} />
+                <span>Home</span>
               </button>
             )}
           </div>
