@@ -35,7 +35,7 @@ import { ProfileSubMenu } from './components/GrowCard/GrowCardProfileHub';
 
 export function App() {
   const [currentUser, setCurrentUser] = useState<UserProfile>(INITIAL_USER_PROFILE);
-  const [activeTab, setActiveTab] = useState<NavigationTab>('home');
+  const [activeTab, setActiveTab] = useState<NavigationTab>('journey');
   const [activeIdp, setActiveIdp] = useState<IndividualDevelopmentPlan>(INITIAL_IDP);
   const [skills, setSkills] = useState<SkillItem[]>(INITIAL_SKILLS);
   const [cataloguePrograms, setCataloguePrograms] = useState<CatalogueProgram[]>(INITIAL_CATALOGUE);
