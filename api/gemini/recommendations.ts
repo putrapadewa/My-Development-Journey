@@ -55,7 +55,10 @@ Include at least one 70_EXPERIENCE, one 20_EXPOSURE, and one 10_LEARNING activit
     });
 
     const text = message.content[0].type === 'text' ? message.content[0].text : '{}';
-    res.json(JSON.parse(text.trim()));
+    let jsonText = text.trim();
+    const mdMatch = jsonText.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (mdMatch) jsonText = mdMatch[1].trim();
+    res.json(JSON.parse(jsonText));
   } catch (err: any) {
     console.error('Recommendations error:', err);
     res.status(500).json({ error: err.message });
