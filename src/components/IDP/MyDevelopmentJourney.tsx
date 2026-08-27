@@ -1,31 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Sparkles,
-  Plus,
   Send,
   CheckCircle2,
   Clock,
-  AlertCircle,
-  TrendingUp,
-  FileText,
   Calendar,
-  Layers,
   Award,
   ChevronRight,
   Shield,
-  Zap,
-  Edit3,
   Trash2,
   ExternalLink,
+  Compass,
+  ArrowRight,
+  Target,
 } from 'lucide-react';
 import {
   IndividualDevelopmentPlan,
   DevelopmentActivity,
   UserProfile,
-  IDPStatus,
   ActivityFramework,
 } from '../../types';
-import { AIRecommendationModal } from './AIRecommendationModal';
 import { ActivityDetailModal } from './ActivityDetailModal';
 import { triggerMilestoneCelebration } from '../../utils/confetti';
 
@@ -36,20 +30,38 @@ interface MyDevelopmentJourneyProps {
   onOpenAICoach: () => void;
 }
 
+type JourneyView = 'WELCOME' | 'AI_SETUP' | 'JOURNEY';
+
+const SCAN_ITEMS = (name: string, bu: string, actCount: number) => [
+  `Membaca profil: ${name}`,
+  `Menganalisa skill gaps di ${bu}`,
+  'Menelaah histori IDP dan aktivitas sebelumnya',
+  `Mencocokkan dengan ${actCount > 0 ? actCount + ' aktivitas tersimpan & ' : ''}katalog programme`,
+  'Menyiapkan rekomendasi personal 70:20:10...',
+];
+
 export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
   currentUser,
   idp,
   onUpdateIdp,
   onOpenAICoach,
 }) => {
-  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+  const [journeyView, setJourneyView] = useState<JourneyView>('WELCOME');
   const [selectedActivity, setSelectedActivity] = useState<DevelopmentActivity | null>(null);
   const [activeFilter, setActiveFilter] = useState<'ALL' | ActivityFramework>('ALL');
 
-  // Calculate 4 separate progress dimensions
+  // AI Setup states
+  const [isAiScanning, setIsAiScanning] = useState(false);
+  const [scanProgress, setScanProgress] = useState(-1);
+  const [focusArea, setFocusArea] = useState('');
+  const [aiAspiration, setAiAspiration] = useState('');
+  const [aiStrengths, setAiStrengths] = useState('');
+  const [aiPeriod, setAiPeriod] = useState('2026 H1 (Jan - Jun 2026)');
+  const [isAiSetupLoading, setIsAiSetupLoading] = useState(false);
+
   const activities = idp.activities || [];
   const total = activities.length;
-  
+
   const learningCount = activities.filter((a) => a.frameworkType === '10_LEARNING').length;
   const exposureCount = activities.filter((a) => a.frameworkType === '20_EXPOSURE').length;
   const experienceCount = activities.filter((a) => a.frameworkType === '70_EXPERIENCE').length;
@@ -66,6 +78,24 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
   const totalLearningHours = activities.reduce((acc, curr) => acc + (curr.learningHours || 0), 0);
   const totalXP = activities.reduce((acc, curr) => acc + (curr.xpValue || 0), 0);
 
+  // Scan animation when entering AI_SETUP
+  useEffect(() => {
+    if (journeyView !== 'AI_SETUP') return;
+    setIsAiScanning(true);
+    setScanProgress(0);
+    const items = SCAN_ITEMS(currentUser.name, currentUser.businessUnit, activities.length);
+    let idx = 0;
+    const timer = setInterval(() => {
+      idx++;
+      setScanProgress(idx);
+      if (idx >= items.length - 1) {
+        clearInterval(timer);
+        setTimeout(() => setIsAiScanning(false), 700);
+      }
+    }, 550);
+    return () => clearInterval(timer);
+  }, [journeyView]);
+
   const handleApplyAIPlan = (newActivities: DevelopmentActivity[], objective: string, businessGoal: string) => {
     const updated: IndividualDevelopmentPlan = {
       ...idp,
@@ -77,6 +107,59 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
     };
     onUpdateIdp(updated);
     triggerMilestoneCelebration();
+  };
+
+  const handleGenerateAI = async () => {
+    setIsAiSetupLoading(true);
+    try {
+      const response = await fetch('/api/gemini/recommendations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          organizationGoal: 'Group 2026 Digital North Star: 40% reduction in cloud latency, $500k FinOps optimization, and 3 enterprise AI copilot rollouts.',
+          individualKpi: 'Lead zero-downtime microservices migration and establish enterprise GenAI guardrails.',
+          currentPosition: currentUser.position,
+          businessUnit: currentUser.businessUnit,
+          areasOfImprovement: focusArea || 'Executive leadership and strategic communication',
+          strengths: aiStrengths || 'Technical expertise and problem-solving',
+          aspiration: aiAspiration || `Senior ${currentUser.position}`,
+          nextPosition: aiAspiration || `Senior ${currentUser.position}`,
+          targetBusinessUnit: currentUser.businessUnit,
+          period: aiPeriod,
+        }),
+      });
+
+      const data = await response.json();
+
+      const mappedActivities: DevelopmentActivity[] = (data.recommendedActivities || []).map(
+        (rec: any, idx: number) => ({
+          id: `act-gen-${Date.now()}-${idx}`,
+          idpId: idp.id,
+          goal: rec.goal || 'Develop enterprise capability',
+          programName: rec.programName || 'Development Activity',
+          provider: rec.provider || 'Internal / External',
+          frameworkType: rec.frameworkType || '10_LEARNING',
+          timelineStart: '2026-01-15',
+          timelineEnd: '2026-06-30',
+          status: 'DRAFT',
+          measurement: rec.measurement || 'To be defined based on project deliverables',
+          skillIds: [],
+          skillNames: rec.skillNames || [],
+          expectedImpact: rec.expectedImpact || 'Bridges critical skill gaps for target role',
+          learningHours: rec.learningHours || 8,
+          xpValue: rec.frameworkType === '70_EXPERIENCE' ? 300 : rec.frameworkType === '20_EXPOSURE' ? 180 : 120,
+        })
+      );
+
+      const objective = data.primaryObjective || `Develop strategic capabilities aligned to ${aiAspiration || currentUser.position} — ${aiPeriod}`;
+      handleApplyAIPlan(mappedActivities, objective, 'Aligned to Group Digital North Star 2026');
+      setJourneyView('JOURNEY');
+    } catch (err) {
+      console.error('AI generation error:', err);
+      setJourneyView('JOURNEY');
+    } finally {
+      setIsAiSetupLoading(false);
+    }
   };
 
   const handleSubmitForApproval = () => {
@@ -91,31 +174,267 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
 
   const handleSaveActivity = (updatedAct: DevelopmentActivity) => {
     const updatedActivities = activities.map((a) => (a.id === updatedAct.id ? updatedAct : a));
-    const updated: IndividualDevelopmentPlan = {
-      ...idp,
-      activities: updatedActivities,
-      updatedAt: new Date().toISOString(),
-    };
-    onUpdateIdp(updated);
+    onUpdateIdp({ ...idp, activities: updatedActivities, updatedAt: new Date().toISOString() });
   };
 
   const handleDeleteActivity = (actId: string) => {
-    const updatedActivities = activities.filter((a) => a.id !== actId);
-    onUpdateIdp({
-      ...idp,
-      activities: updatedActivities,
-      updatedAt: new Date().toISOString(),
-    });
+    onUpdateIdp({ ...idp, activities: activities.filter((a) => a.id !== actId), updatedAt: new Date().toISOString() });
   };
 
-  const filteredActivities = activeFilter === 'ALL'
-    ? activities
-    : activities.filter((a) => a.frameworkType === activeFilter);
+  const filteredActivities = activeFilter === 'ALL' ? activities : activities.filter((a) => a.frameworkType === activeFilter);
 
+  // ─── WELCOME VIEW ───────────────────────────────────────────────────────────
+  if (journeyView === 'WELCOME') {
+    return (
+      <div className="min-h-[72vh] flex items-center justify-center pb-12">
+        <div className="max-w-2xl w-full mx-auto">
+          <div className="rounded-3xl bg-gradient-to-br from-indigo-900 via-indigo-800 to-slate-900 text-white p-10 sm:p-14 shadow-2xl border border-indigo-700/40 text-center relative overflow-hidden">
+            {/* Background glows */}
+            <div className="absolute -top-24 -right-24 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative z-10">
+              {/* Icon */}
+              <div className="flex justify-center mb-7">
+                <div className="w-24 h-24 rounded-3xl bg-amber-400/20 border border-amber-400/30 flex items-center justify-center shadow-lg">
+                  <Compass className="w-12 h-12 text-amber-400" />
+                </div>
+              </div>
+
+              {/* Title */}
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white leading-tight">
+                Ayo Buat My Development Journey!
+              </h2>
+
+              {/* Motivational quote */}
+              <blockquote className="mt-5 text-sm text-indigo-200/80 italic leading-relaxed max-w-lg mx-auto border-l-2 border-amber-400/40 pl-4 text-left">
+                "An investment in knowledge pays the best interest."
+                <br />
+                <span className="text-indigo-300/60 not-italic text-xs font-medium">— Benjamin Franklin</span>
+              </blockquote>
+
+              {/* Description */}
+              <p className="mt-6 text-sm text-indigo-200/90 leading-relaxed max-w-md mx-auto">
+                AI akan menganalisa profil, skill gaps, dan tujuan kariermu untuk menyusun rencana pengembangan yang dipersonalisasi menggunakan framework{' '}
+                <strong className="text-amber-300">70:20:10</strong>.
+              </p>
+
+              {/* Feature pills */}
+              <div className="flex flex-wrap justify-center gap-2 mt-5">
+                {['Analisa Skill Gaps', 'Rekomendasi Programme', 'Framework 70:20:10', 'Dipersonalisasi AI'].map((f) => (
+                  <span key={f} className="text-[11px] font-semibold px-3 py-1 rounded-full bg-white/10 border border-white/20 text-indigo-100">
+                    {f}
+                  </span>
+                ))}
+              </div>
+
+              {/* CTA */}
+              <button
+                onClick={() => setJourneyView('AI_SETUP')}
+                className="mt-9 inline-flex items-center gap-2.5 px-9 py-4 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-sm shadow-lg transition-all cursor-pointer"
+              >
+                <Sparkles className="w-4 h-4 fill-slate-950" />
+                Mulai Journey Saya
+                <ArrowRight className="w-4 h-4" />
+              </button>
+
+              {/* Skip if already has activities */}
+              {activities.length > 0 && (
+                <button
+                  onClick={() => setJourneyView('JOURNEY')}
+                  className="mt-4 block mx-auto text-xs text-indigo-300/70 hover:text-indigo-200 transition-colors underline cursor-pointer"
+                >
+                  Lihat journey yang sudah ada ({activities.length} aktivitas) →
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── AI SETUP VIEW ───────────────────────────────────────────────────────────
+  if (journeyView === 'AI_SETUP') {
+    const scanItems = SCAN_ITEMS(currentUser.name, currentUser.businessUnit, activities.length);
+
+    return (
+      <div className="max-w-3xl mx-auto space-y-5 pb-12">
+        <div className="rounded-3xl bg-white border border-slate-200 shadow-xl overflow-hidden">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-indigo-900 to-slate-900 text-white p-6">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-2xl bg-amber-400/20 border border-amber-400/30 flex items-center justify-center shrink-0">
+                <Sparkles className="w-5 h-5 text-amber-400" />
+              </div>
+              <div>
+                <h2 className="font-extrabold text-base sm:text-lg">AI Development Advisor</h2>
+                <p className="text-xs text-indigo-200 mt-0.5">Menyusun rencana pengembangan yang dipersonalisasi untuk {currentUser.name}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* AI Scanning Section */}
+          <div className="p-6 border-b border-slate-100 bg-slate-50/60">
+            {isAiScanning ? (
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-indigo-100 border border-indigo-200 flex items-center justify-center animate-pulse shrink-0">
+                    <Sparkles className="w-4 h-4 text-indigo-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-slate-900">AI sedang membaca data yang tersedia...</p>
+                    <p className="text-xs text-slate-500">Harap tunggu sebentar</p>
+                  </div>
+                </div>
+                <div className="space-y-2 pl-12">
+                  {scanItems.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className={`flex items-center gap-2 text-xs transition-all duration-300 ${
+                        idx <= scanProgress ? 'text-slate-700' : 'text-slate-300'
+                      }`}
+                    >
+                      {idx < scanProgress ? (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      ) : idx === scanProgress ? (
+                        <div className="w-3.5 h-3.5 rounded-full border-2 border-indigo-500 border-t-transparent animate-spin shrink-0" />
+                      ) : (
+                        <div className="w-3.5 h-3.5 rounded-full border border-slate-200 shrink-0" />
+                      )}
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-full bg-emerald-100 border border-emerald-200 flex items-center justify-center shrink-0">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-slate-900">Analisa profil selesai</p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    AI telah membaca profil, skill gaps, dan target karier kamu. Tambahkan informasi di bawah untuk rekomendasi yang lebih akurat — atau langsung klik Generate.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Additional Input Fields */}
+          <div className="p-6 space-y-5">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900">Perkuat Analisa AI</h3>
+              <p className="text-xs text-slate-500 mt-0.5">Semua field di bawah bersifat opsional — AI akan menggunakan data profil sebagai dasar analisa.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Focus Area */}
+              <div className="md:col-span-2">
+                <label className="text-xs font-bold text-slate-700 block mb-1.5">
+                  Fokus Area Development
+                </label>
+                <textarea
+                  value={focusArea}
+                  onChange={(e) => setFocusArea(e.target.value)}
+                  placeholder="Mis: Ingin meningkatkan executive presence dan kemampuan memimpin tim lintas fungsi, atau fokus pada data storytelling untuk C-Suite presentation..."
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 resize-none bg-white"
+                  rows={3}
+                />
+              </div>
+
+              {/* Aspiration */}
+              <div>
+                <label className="text-xs font-bold text-slate-700 block mb-1.5 flex items-center gap-1.5">
+                  <Target className="w-3.5 h-3.5 text-indigo-500" />
+                  Target Role / Aspirasi Karier
+                </label>
+                <input
+                  type="text"
+                  value={aiAspiration}
+                  onChange={(e) => setAiAspiration(e.target.value)}
+                  placeholder="Mis: Head of Digital Strategy, VP Technology..."
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 bg-white"
+                />
+              </div>
+
+              {/* Strengths */}
+              <div>
+                <label className="text-xs font-bold text-slate-700 block mb-1.5">
+                  Kekuatan / Kompetensi yang Sudah Ada
+                </label>
+                <input
+                  type="text"
+                  value={aiStrengths}
+                  onChange={(e) => setAiStrengths(e.target.value)}
+                  placeholder="Mis: Cloud Architecture, Stakeholder Engagement, Agile..."
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 bg-white"
+                />
+              </div>
+
+              {/* Period */}
+              <div>
+                <label className="text-xs font-bold text-slate-700 block mb-1.5">
+                  Periode Development
+                </label>
+                <select
+                  value={aiPeriod}
+                  onChange={(e) => setAiPeriod(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 bg-white cursor-pointer"
+                >
+                  <option>2026 H1 (Jan - Jun 2026)</option>
+                  <option>2026 H2 (Jul - Des 2026)</option>
+                  <option>Full Year 2026</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Note about 70:20:10 */}
+            <div className="flex items-start gap-2.5 p-3.5 rounded-xl bg-indigo-50 border border-indigo-100">
+              <Award className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+              <p className="text-xs text-indigo-800 leading-relaxed">
+                AI akan menyusun <strong>minimum 5 aktivitas</strong> dengan komposisi ideal: 70% Experience (Action Project), 20% Exposure (Mentoring/Shadowing), dan 10% Formal Learning (Pelatihan/Kursus).
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center justify-between pt-1">
+              <button
+                onClick={() => setJourneyView('WELCOME')}
+                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                ← Kembali
+              </button>
+              <button
+                onClick={handleGenerateAI}
+                disabled={isAiSetupLoading || isAiScanning}
+                className="flex items-center gap-2 px-7 py-3 rounded-xl bg-indigo-900 hover:bg-indigo-800 text-white text-xs font-bold shadow-sm transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isAiSetupLoading ? (
+                  <>
+                    <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                    AI Sedang Menyusun Rencana...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 fill-white" />
+                    Generate Rekomendasi 70:20:10
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── JOURNEY VIEW ────────────────────────────────────────────────────────────
   return (
     <div className="space-y-6 pb-12">
-      
-      {/* 1. Header Banner Bento Container */}
+
+      {/* 1. Header Banner */}
       <div className="rounded-3xl bg-indigo-900 text-white p-6 sm:p-8 shadow-xl border border-indigo-800 relative overflow-hidden">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
@@ -147,12 +466,11 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
           {/* Action CTA */}
           <div className="flex flex-wrap items-center gap-3">
             <button
-              id="idp-launch-ai-advisor-btn"
-              onClick={() => setIsAIModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs sm:text-sm shadow-md transition-all cursor-pointer"
+              onClick={() => setJourneyView('AI_SETUP')}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-amber-400/20 hover:bg-amber-400/30 border border-amber-400/30 text-amber-300 font-bold text-xs sm:text-sm transition-all cursor-pointer"
             >
-              <Sparkles className="w-4 h-4 text-amber-950 fill-amber-950" />
-              <span>AI 70:20:10 Curation</span>
+              <Sparkles className="w-4 h-4" />
+              <span>Susun Ulang dengan AI</span>
             </button>
 
             {idp.status === 'DRAFT' || idp.status === 'REQUEST_REVISION' ? (
@@ -188,10 +506,8 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
         )}
       </div>
 
-      {/* 2. Four Separate Progress Dimensions (Bento Tiles) */}
+      {/* 2. Four Progress Dimensions */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        
-        {/* Dimension 1: Plan Progress */}
         <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-2xs space-y-2.5 hover:border-indigo-200 transition-all">
           <div className="flex items-center justify-between text-xs">
             <span className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">1. Plan Progress</span>
@@ -203,7 +519,6 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
           <p className="text-[10.5px] text-slate-500 font-medium">IDP Governance & Goal Alignment</p>
         </div>
 
-        {/* Dimension 2: Learning Progress */}
         <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-2xs space-y-2.5 hover:border-cyan-200 transition-all">
           <div className="flex items-center justify-between text-xs">
             <span className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">2. Learning Progress</span>
@@ -215,7 +530,6 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
           <p className="text-[10.5px] text-slate-500 font-medium">{completedActivities.length} of {total} activities marked complete</p>
         </div>
 
-        {/* Dimension 3: Application Progress */}
         <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-2xs space-y-2.5 hover:border-amber-200 transition-all">
           <div className="flex items-center justify-between text-xs">
             <span className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">3. Application Progress</span>
@@ -227,7 +541,6 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
           <p className="text-[10.5px] text-slate-500 font-medium">{withEvidenceActivities.length} of {total} have verified evidence/links</p>
         </div>
 
-        {/* Dimension 4: Capability & Impact Progress */}
         <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-2xs space-y-2.5 hover:border-emerald-200 transition-all">
           <div className="flex items-center justify-between text-xs">
             <span className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">4. Capability Progress</span>
@@ -238,61 +551,35 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
           </div>
           <p className="text-[10.5px] text-slate-500 font-medium">{validatedActivities.length} validated by Manager</p>
         </div>
-
       </div>
 
-      {/* 3. Framework Filter Bar & Stats Bento */}
+      {/* 3. Filter Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/90 shadow-2xs">
         <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
-          <button
-            onClick={() => setActiveFilter('ALL')}
-            className={`px-3.5 py-1.5 rounded-2xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-              activeFilter === 'ALL'
-                ? 'bg-indigo-900 text-white shadow-xs'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-            }`}
-          >
-            All Activities ({total})
-          </button>
-          <button
-            onClick={() => setActiveFilter('70_EXPERIENCE')}
-            className={`px-3.5 py-1.5 rounded-2xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-              activeFilter === '70_EXPERIENCE'
-                ? 'bg-amber-600 text-white shadow-xs'
-                : 'bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100'
-            }`}
-          >
-            70% Experience ({experienceCount})
-          </button>
-          <button
-            onClick={() => setActiveFilter('20_EXPOSURE')}
-            className={`px-3.5 py-1.5 rounded-2xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-              activeFilter === '20_EXPOSURE'
-                ? 'bg-purple-600 text-white shadow-xs'
-                : 'bg-purple-50 text-purple-900 border border-purple-200 hover:bg-purple-100'
-            }`}
-          >
-            20% Exposure ({exposureCount})
-          </button>
-          <button
-            onClick={() => setActiveFilter('10_LEARNING')}
-            className={`px-3.5 py-1.5 rounded-2xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-              activeFilter === '10_LEARNING'
-                ? 'bg-cyan-600 text-white shadow-xs'
-                : 'bg-cyan-50 text-cyan-900 border border-cyan-200 hover:bg-cyan-100'
-            }`}
-          >
-            10% Learning ({learningCount})
-          </button>
+          {[
+            { id: 'ALL', label: `All Activities (${total})`, active: 'bg-indigo-900 text-white shadow-xs', inactive: 'bg-slate-100 text-slate-600 hover:bg-slate-200' },
+            { id: '70_EXPERIENCE', label: `70% Experience (${experienceCount})`, active: 'bg-amber-600 text-white shadow-xs', inactive: 'bg-amber-50 text-amber-900 border border-amber-200 hover:bg-amber-100' },
+            { id: '20_EXPOSURE', label: `20% Exposure (${exposureCount})`, active: 'bg-purple-600 text-white shadow-xs', inactive: 'bg-purple-50 text-purple-900 border border-purple-200 hover:bg-purple-100' },
+            { id: '10_LEARNING', label: `10% Learning (${learningCount})`, active: 'bg-cyan-600 text-white shadow-xs', inactive: 'bg-cyan-50 text-cyan-900 border border-cyan-200 hover:bg-cyan-100' },
+          ].map((f) => (
+            <button
+              key={f.id}
+              onClick={() => setActiveFilter(f.id as any)}
+              className={`px-3.5 py-1.5 rounded-2xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                activeFilter === f.id ? f.active : f.inactive
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
         </div>
-
         <div className="flex items-center gap-4 text-xs text-slate-600 justify-between sm:justify-end font-medium">
           <span>Total Learning: <strong className="text-slate-900 font-bold">{totalLearningHours} Hours</strong></span>
           <span>Potential XP: <strong className="text-indigo-700 font-bold">+{totalXP} XP</strong></span>
         </div>
       </div>
 
-      {/* 4. Activities Cards List (Bento Tile Cards) */}
+      {/* 4. Activity Cards */}
       <div className="space-y-4">
         {filteredActivities.map((act) => {
           const isExp = act.frameworkType === '70_EXPERIENCE';
@@ -302,7 +589,6 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
             : isExpo
             ? 'bg-purple-100 text-purple-900 border-purple-200'
             : 'bg-cyan-100 text-cyan-900 border-cyan-200';
-
           const hasEvidence = Boolean(act.evidenceText || act.evidenceLink);
 
           return (
@@ -310,7 +596,6 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
               key={act.id}
               className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-2xs hover:shadow-md transition-all duration-200 space-y-4"
             >
-              {/* Card Top */}
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -335,10 +620,7 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
                       </span>
                     )}
                   </div>
-
-                  <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-snug">
-                    {act.programName}
-                  </h3>
+                  <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-snug">{act.programName}</h3>
                   <p className="text-xs sm:text-sm text-slate-600 font-medium">
                     <strong className="text-slate-900">Goal:</strong> {act.goal}
                   </p>
@@ -365,7 +647,6 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
                 </div>
               </div>
 
-              {/* Card Details Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs bg-slate-50 p-4 rounded-2xl border border-slate-100">
                 <div>
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Success Measurement:</span>
@@ -383,7 +664,6 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
                 </div>
               </div>
 
-              {/* Evidence & Reflection Preview if logged */}
               {hasEvidence && (
                 <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 text-xs space-y-1.5">
                   <div className="flex items-center justify-between">
@@ -411,7 +691,6 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
                 </div>
               )}
 
-              {/* Card Footer */}
               <div className="flex flex-wrap items-center justify-between text-[11px] text-slate-500 pt-1 font-medium">
                 <span className="flex items-center gap-1.5">
                   <Calendar className="w-3.5 h-3.5 text-slate-400" />
@@ -425,14 +704,6 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
         })}
       </div>
 
-      {/* AI Recommendation Modal */}
-      <AIRecommendationModal
-        isOpen={isAIModalOpen}
-        onClose={() => setIsAIModalOpen(false)}
-        currentUser={currentUser}
-        onApplyPlan={handleApplyAIPlan}
-      />
-
       {/* Activity Detail Modal */}
       <ActivityDetailModal
         activity={selectedActivity}
@@ -442,7 +713,6 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
         activeRole={currentUser.activeRole}
         managerName={currentUser.managerName}
       />
-
     </div>
   );
 };
