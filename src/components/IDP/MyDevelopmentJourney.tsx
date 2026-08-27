@@ -126,7 +126,7 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
     setIsAiSetupLoading(true);
     setAiSetupError('');
     try {
-      const response = await fetch('/api/gemini/recommendations', {
+      const response = await fetch('/api/claude/recommendations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -52,7 +52,7 @@ export const AIRecommendationModal: React.FC<AIRecommendationModalProps> = ({
   const handleGenerate = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/gemini/recommendations', {
+      const response = await fetch('/api/claude/recommendations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

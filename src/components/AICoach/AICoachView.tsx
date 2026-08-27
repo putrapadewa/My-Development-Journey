@@ -94,7 +94,7 @@ ${mode === 'COACH'
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/gemini/coach', {
+      const response = await fetch('/api/claude/coach', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

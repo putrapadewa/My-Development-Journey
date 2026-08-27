@@ -99,7 +99,7 @@ export const ProgramDetailFullPage: React.FC<ProgramDetailFullPageProps> = ({
     setIsHelpdeskLoading(true);
 
     try {
-      const res = await fetch('/api/gemini/coach', {
+      const res = await fetch('/api/claude/coach', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
