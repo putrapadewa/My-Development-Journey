@@ -13,6 +13,11 @@ import {
   Sprout,
   ArrowRight,
   Target,
+  Plus,
+  Edit2,
+  X,
+  Save,
+  AlertCircle,
 } from 'lucide-react';
 import {
   IndividualDevelopmentPlan,
@@ -30,7 +35,7 @@ interface MyDevelopmentJourneyProps {
   onOpenAICoach: () => void;
 }
 
-type JourneyView = 'WELCOME' | 'AI_SETUP' | 'JOURNEY';
+type JourneyView = 'WELCOME' | 'AI_SETUP' | 'AI_REVIEW' | 'JOURNEY';
 
 const SCAN_ITEMS = (name: string, bu: string, actCount: number) => [
   `Membaca profil: ${name}`,
@@ -58,6 +63,13 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
   const [aiStrengths, setAiStrengths] = useState('');
   const [aiPeriod, setAiPeriod] = useState('2026 H1 (Jan - Jun 2026)');
   const [isAiSetupLoading, setIsAiSetupLoading] = useState(false);
+
+  // AI Review states
+  const [pendingActivities, setPendingActivities] = useState<DevelopmentActivity[]>([]);
+  const [pendingObjective, setPendingObjective] = useState('');
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<Partial<DevelopmentActivity>>({});
 
   const activities = idp.activities || [];
   const total = activities.length;
@@ -152,11 +164,14 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
       );
 
       const objective = data.primaryObjective || `Develop strategic capabilities aligned to ${aiAspiration || currentUser.position} — ${aiPeriod}`;
-      handleApplyAIPlan(mappedActivities, objective, 'Aligned to Group Digital North Star 2026');
-      setJourneyView('JOURNEY');
+      setPendingActivities(mappedActivities);
+      setPendingObjective(objective);
+      setSelectedIds(mappedActivities.map((a) => a.id));
+      setEditingId(null);
+      setJourneyView('AI_REVIEW');
     } catch (err) {
       console.error('AI generation error:', err);
-      setJourneyView('JOURNEY');
+      setJourneyView('AI_SETUP');
     } finally {
       setIsAiSetupLoading(false);
     }
@@ -406,6 +421,342 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
                 )}
               </button>
             </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── AI REVIEW VIEW ──────────────────────────────────────────────────────────
+  if (journeyView === 'AI_REVIEW') {
+    const frameworkLabel = (ft: ActivityFramework) =>
+      ft === '70_EXPERIENCE' ? '70 – Experience' : ft === '20_EXPOSURE' ? '20 – Exposure' : '10 – Learning';
+
+    const frameworkColor = (ft: ActivityFramework) =>
+      ft === '70_EXPERIENCE'
+        ? 'bg-violet-100 text-violet-700 border-violet-200'
+        : ft === '20_EXPOSURE'
+        ? 'bg-blue-100 text-blue-700 border-blue-200'
+        : 'bg-emerald-100 text-emerald-700 border-emerald-200';
+
+    const toggleSelect = (id: string) => {
+      setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+    };
+
+    const toggleSelectAll = () => {
+      setSelectedIds(selectedIds.length === pendingActivities.length ? [] : pendingActivities.map((a) => a.id));
+    };
+
+    const handleStartEdit = (act: DevelopmentActivity) => {
+      setEditingId(act.id);
+      setEditForm({ ...act });
+    };
+
+    const handleSaveEdit = () => {
+      if (!editingId) return;
+      setPendingActivities((prev) =>
+        prev.map((a) => (a.id === editingId ? ({ ...a, ...editForm } as DevelopmentActivity) : a))
+      );
+      setEditingId(null);
+      setEditForm({});
+    };
+
+    const handleCancelEdit = () => {
+      setEditingId(null);
+      setEditForm({});
+    };
+
+    const handleDeletePending = (id: string) => {
+      setPendingActivities((prev) => prev.filter((a) => a.id !== id));
+      setSelectedIds((prev) => prev.filter((x) => x !== id));
+    };
+
+    const handleAddRow = () => {
+      const newId = `act-new-${Date.now()}`;
+      const newAct: DevelopmentActivity = {
+        id: newId,
+        idpId: idp.id,
+        goal: '',
+        programName: '',
+        provider: '',
+        frameworkType: '10_LEARNING',
+        timelineStart: '2026-01-15',
+        timelineEnd: '2026-06-30',
+        status: 'DRAFT',
+        measurement: '',
+        skillIds: [],
+        skillNames: [],
+        expectedImpact: '',
+        learningHours: 8,
+        xpValue: 120,
+      };
+      setPendingActivities((prev) => [...prev, newAct]);
+      setSelectedIds((prev) => [...prev, newId]);
+      setEditingId(newId);
+      setEditForm({ ...newAct });
+    };
+
+    const handleConfirmReview = () => {
+      const chosen = pendingActivities.filter((a) => selectedIds.includes(a.id));
+      const businessGoal = `Aligned to Group 2026 Digital North Star and ${currentUser.businessUnit} strategic priorities.`;
+      handleApplyAIPlan(chosen, pendingObjective, businessGoal);
+      setJourneyView('JOURNEY');
+    };
+
+    const expCount70 = pendingActivities.filter((a) => selectedIds.includes(a.id) && a.frameworkType === '70_EXPERIENCE').length;
+    const expCount20 = pendingActivities.filter((a) => selectedIds.includes(a.id) && a.frameworkType === '20_EXPOSURE').length;
+    const learnCount10 = pendingActivities.filter((a) => selectedIds.includes(a.id) && a.frameworkType === '10_LEARNING').length;
+
+    return (
+      <div className="space-y-5 pb-12">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-extrabold text-slate-900">Review Rekomendasi AI</h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Tinjau, edit, atau hapus rekomendasi sebelum menyimpan ke journey kamu.
+            </p>
+          </div>
+          <button
+            onClick={() => setJourneyView('AI_SETUP')}
+            className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
+          >
+            ← Kembali
+          </button>
+        </div>
+
+        {/* Objective banner */}
+        <div className="flex items-start gap-3 p-4 rounded-2xl bg-indigo-50 border border-indigo-100">
+          <Sparkles className="w-4 h-4 text-indigo-500 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-[11px] font-bold text-indigo-500 uppercase tracking-wide">AI-Generated Objective</p>
+            <p className="text-sm font-semibold text-indigo-900 mt-0.5">{pendingObjective}</p>
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-200">
+                  <th className="p-3 text-center w-8">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.length === pendingActivities.length && pendingActivities.length > 0}
+                      onChange={toggleSelectAll}
+                      className="w-3.5 h-3.5 rounded cursor-pointer"
+                    />
+                  </th>
+                  <th className="p-3 text-left text-slate-500 font-semibold w-8">No.</th>
+                  <th className="p-3 text-left text-slate-500 font-semibold whitespace-nowrap">Framework</th>
+                  <th className="p-3 text-left text-slate-500 font-semibold min-w-[160px]">Goal</th>
+                  <th className="p-3 text-left text-slate-500 font-semibold min-w-[160px]">Program / Aktivitas</th>
+                  <th className="p-3 text-left text-slate-500 font-semibold">Provider</th>
+                  <th className="p-3 text-left text-slate-500 font-semibold whitespace-nowrap">Timeline</th>
+                  <th className="p-3 text-center text-slate-500 font-semibold whitespace-nowrap">Jam</th>
+                  <th className="p-3 text-left text-slate-500 font-semibold min-w-[140px]">Measurement</th>
+                  <th className="p-3 text-center text-slate-500 font-semibold w-20">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {pendingActivities.map((act, idx) => {
+                  const isEditing = editingId === act.id;
+                  const isSelected = selectedIds.includes(act.id);
+
+                  if (isEditing) {
+                    return (
+                      <tr key={act.id} className="bg-indigo-50/60">
+                        <td className="p-3 text-center">
+                          <input type="checkbox" checked disabled className="w-3.5 h-3.5 rounded opacity-40" />
+                        </td>
+                        <td className="p-3 text-slate-400">{idx + 1}</td>
+                        <td className="p-3">
+                          <select
+                            value={(editForm.frameworkType as string) || act.frameworkType}
+                            onChange={(e) => setEditForm((f) => ({ ...f, frameworkType: e.target.value as ActivityFramework }))}
+                            className="px-2 py-1 rounded-lg border border-slate-200 text-[11px] bg-white focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                          >
+                            <option value="70_EXPERIENCE">70 – Experience</option>
+                            <option value="20_EXPOSURE">20 – Exposure</option>
+                            <option value="10_LEARNING">10 – Learning</option>
+                          </select>
+                        </td>
+                        <td className="p-3">
+                          <input
+                            value={editForm.goal ?? ''}
+                            onChange={(e) => setEditForm((f) => ({ ...f, goal: e.target.value }))}
+                            placeholder="Goal..."
+                            className="w-full px-2 py-1 rounded-lg border border-slate-200 text-[11px] bg-white focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                          />
+                        </td>
+                        <td className="p-3">
+                          <input
+                            value={editForm.programName ?? ''}
+                            onChange={(e) => setEditForm((f) => ({ ...f, programName: e.target.value }))}
+                            placeholder="Nama program..."
+                            className="w-full px-2 py-1 rounded-lg border border-slate-200 text-[11px] bg-white focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                          />
+                        </td>
+                        <td className="p-3">
+                          <input
+                            value={editForm.provider ?? ''}
+                            onChange={(e) => setEditForm((f) => ({ ...f, provider: e.target.value }))}
+                            placeholder="Provider..."
+                            className="w-full px-2 py-1 rounded-lg border border-slate-200 text-[11px] bg-white focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                          />
+                        </td>
+                        <td className="p-3">
+                          <div className="flex flex-col gap-1">
+                            <input
+                              type="date"
+                              value={editForm.timelineStart ?? ''}
+                              onChange={(e) => setEditForm((f) => ({ ...f, timelineStart: e.target.value }))}
+                              className="px-2 py-1 rounded-lg border border-slate-200 text-[11px] bg-white focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                            />
+                            <input
+                              type="date"
+                              value={editForm.timelineEnd ?? ''}
+                              onChange={(e) => setEditForm((f) => ({ ...f, timelineEnd: e.target.value }))}
+                              className="px-2 py-1 rounded-lg border border-slate-200 text-[11px] bg-white focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                            />
+                          </div>
+                        </td>
+                        <td className="p-3 text-center">
+                          <input
+                            type="number"
+                            value={editForm.learningHours ?? 8}
+                            onChange={(e) => setEditForm((f) => ({ ...f, learningHours: Number(e.target.value) }))}
+                            className="w-14 px-2 py-1 rounded-lg border border-slate-200 text-[11px] bg-white focus:outline-none focus:ring-1 focus:ring-indigo-400 text-center"
+                            min={1}
+                          />
+                        </td>
+                        <td className="p-3">
+                          <input
+                            value={editForm.measurement ?? ''}
+                            onChange={(e) => setEditForm((f) => ({ ...f, measurement: e.target.value }))}
+                            placeholder="Ukuran keberhasilan..."
+                            className="w-full px-2 py-1 rounded-lg border border-slate-200 text-[11px] bg-white focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                          />
+                        </td>
+                        <td className="p-3">
+                          <div className="flex items-center gap-1 justify-center">
+                            <button
+                              onClick={handleSaveEdit}
+                              className="p-1.5 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-700 transition-colors cursor-pointer"
+                              title="Simpan"
+                            >
+                              <Save className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={handleCancelEdit}
+                              className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors cursor-pointer"
+                              title="Batal"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  }
+
+                  return (
+                    <tr key={act.id} className={`transition-colors ${isSelected ? 'bg-white hover:bg-slate-50/50' : 'bg-slate-50/70 opacity-60'}`}>
+                      <td className="p-3 text-center">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleSelect(act.id)}
+                          className="w-3.5 h-3.5 rounded cursor-pointer"
+                        />
+                      </td>
+                      <td className="p-3 text-slate-400 font-medium">{idx + 1}</td>
+                      <td className="p-3">
+                        <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border ${frameworkColor(act.frameworkType)}`}>
+                          {frameworkLabel(act.frameworkType)}
+                        </span>
+                      </td>
+                      <td className="p-3 text-slate-800 font-medium leading-snug">{act.goal}</td>
+                      <td className="p-3 text-slate-700 leading-snug">{act.programName}</td>
+                      <td className="p-3 text-slate-500">{act.provider}</td>
+                      <td className="p-3 text-slate-500 whitespace-nowrap">
+                        <div className="text-[10px]">{act.timelineStart}</div>
+                        <div className="text-[10px] text-slate-400">→ {act.timelineEnd}</div>
+                      </td>
+                      <td className="p-3 text-center text-slate-700 font-semibold">{act.learningHours}h</td>
+                      <td className="p-3 text-slate-500 leading-snug">{act.measurement}</td>
+                      <td className="p-3">
+                        <div className="flex items-center gap-1 justify-center">
+                          <button
+                            onClick={() => handleStartEdit(act)}
+                            className="p-1.5 rounded-lg hover:bg-indigo-100 text-indigo-500 transition-colors cursor-pointer"
+                            title="Edit"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleDeletePending(act.id)}
+                            className="p-1.5 rounded-lg hover:bg-red-100 text-red-400 transition-colors cursor-pointer"
+                            title="Hapus"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Add row button */}
+          <div className="p-3 border-t border-slate-100">
+            <button
+              onClick={handleAddRow}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-indigo-600 hover:bg-indigo-50 border border-dashed border-indigo-300 transition-colors cursor-pointer w-full justify-center"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Tambah Aktivitas
+            </button>
+          </div>
+        </div>
+
+        {/* Summary + Confirm */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-200">
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="text-xs text-slate-500">
+              <span className="font-bold text-slate-900">{selectedIds.length}</span> dari{' '}
+              <span className="font-bold text-slate-900">{pendingActivities.length}</span> aktivitas dipilih
+            </div>
+            <div className="flex items-center gap-2 flex-wrap text-[11px]">
+              <span className="px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 font-semibold border border-violet-200">
+                {expCount70} Experience (70)
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-semibold border border-blue-200">
+                {expCount20} Exposure (20)
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-semibold border border-emerald-200">
+                {learnCount10} Learning (10)
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            {selectedIds.length === 0 && (
+              <div className="flex items-center gap-1.5 text-xs text-amber-600">
+                <AlertCircle className="w-4 h-4" />
+                Pilih minimal 1 aktivitas
+              </div>
+            )}
+            <button
+              onClick={handleConfirmReview}
+              disabled={selectedIds.length === 0}
+              className="flex items-center gap-2 px-7 py-3 rounded-xl bg-indigo-900 hover:bg-indigo-800 text-white text-xs font-bold shadow-sm transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Save className="w-4 h-4" />
+              Simpan Journey Saya
+            </button>
           </div>
         </div>
       </div>
