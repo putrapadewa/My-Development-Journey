@@ -146,18 +146,18 @@ export const MyProfileView: React.FC<MyProfileViewProps> = ({ currentUser, onUpd
         <div className="px-6 py-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-5">
           <InfoRow label="Personnel Number" value={currentUser.personnelNumber ?? currentUser.employeeId} />
           <InfoRow label="Global ID" value={currentUser.globalId} />
-          <InfoRow label="Position" value={currentUser.position} />
-          <InfoRow label="Org. Unit" value={currentUser.department} />
-          <InfoRow label="Direktorat" value={currentUser.direktorat ?? currentUser.division} />
-          <InfoRow label="Business Unit" value={currentUser.businessUnit} />
-          <InfoRow label="Business Pillar" value={currentUser.businessPillar} />
           <InfoRow label="Join Date" value={currentUser.joinDate} />
           <InfoRow label="Years of Service" value={
             currentUser.yearsOfService !== undefined
               ? `${currentUser.yearsOfService} years`
               : `${currentUser.yearsOfExperience} years`
           } />
+          <InfoRow label="Position" value={currentUser.position} />
           <InfoRow label="PS Level" value={currentUser.psLevel ?? currentUser.level} />
+          <InfoRow label="Org. Unit" value={currentUser.department} />
+          <InfoRow label="Direktorat" value={currentUser.direktorat ?? currentUser.division} />
+          <InfoRow label="Business Unit" value={currentUser.businessUnit} />
+          <InfoRow label="Business Pillar" value={currentUser.businessPillar} />
         </div>
       </div>
 
