@@ -568,7 +568,8 @@ const BLANK_ACTUALS = (kpiId: string): Record<PeriodKey, PeriodActual> =>
 const DEFAULT_ADD_FORM = {
   name: '',
   description: '',
-  perspective: 'Customers' as Perspective,
+  perspective: 'Customers' as string,
+  perspectiveCustom: '',
   weight: '50',
   uom: '',
   targetType: 'Average' as TargetType,
@@ -672,7 +673,7 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
 
   const handleAddGoal = () => {
     if (!addForm.name.trim()) { setAddFormError('Goal Name is required.'); return; }
-    if (!addForm.uom.trim()) { setAddFormError('UOM is required.'); return; }
+    if (!addForm.uom.trim()) { setAddFormError('Unit of Measure is required.'); return; }
     const target = parseFloat(addForm.annualTarget);
     if (isNaN(target)) { setAddFormError('Annual Target must be a valid number.'); return; }
     const weight = parseInt(addForm.weight);
@@ -681,7 +682,7 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
       id: `manual-${Date.now()}`,
       name: addForm.name.trim(),
       description: addForm.description.trim(),
-      perspective: addForm.perspective,
+      perspective: (addForm.perspective === 'Other' ? (addForm.perspectiveCustom.trim() || 'Other') : addForm.perspective) as Perspective,
       weight,
       uom: addForm.uom.trim(),
       targetType: addForm.targetType,
@@ -730,10 +731,10 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
           <Loader2 className="w-8 h-8 text-indigo-600 animate-spin" />
         </div>
         <div className="text-center space-y-1">
-          <p className="text-base font-black text-slate-800">AI sedang menganalisis profil Anda...</p>
-          <p className="text-sm text-slate-500">Menyesuaikan Goal dengan posisi dan unit bisnis Anda</p>
+          <p className="text-base font-black text-slate-800">AI is analyzing your profile...</p>
+          <p className="text-sm text-slate-500">Tailoring Goals to your position and business unit</p>
           <div className="mt-3 inline-flex flex-col items-start gap-1 px-4 py-3 rounded-xl bg-indigo-50 text-left">
-            <p className="text-[11px] font-bold text-indigo-400 uppercase tracking-wider">Konteks yang Dianalisis</p>
+            <p className="text-[11px] font-bold text-indigo-400 uppercase tracking-wider">Analysis Context</p>
             <p className="text-xs font-semibold text-indigo-800">Posisi: {position}</p>
             <p className="text-xs font-semibold text-indigo-800">Business Unit: {businessUnit || '—'}</p>
             <p className="text-xs font-semibold text-indigo-800">Department: {department || '—'}</p>
@@ -757,13 +758,13 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
               </div>
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-500">AI Generated Suggestions</p>
-                <h2 className="text-sm font-black text-slate-900">Goal yang Direkomendasikan oleh AI</h2>
+                <h2 className="text-sm font-black text-slate-900">AI-Recommended Goals</h2>
               </div>
             </div>
             <p className="text-xs text-slate-500 mt-2">
-              Berdasarkan posisi <span className="font-bold text-slate-700">{position}</span> di{' '}
-              <span className="font-bold text-slate-700">{businessUnit || department || 'unit Anda'}</span>.
-              Pilih Goal yang ingin diadopsi, lalu klik <strong>Adopsi Goal Terpilih</strong>.
+              Based on position <span className="font-bold text-slate-700">{position}</span> in{' '}
+              <span className="font-bold text-slate-700">{businessUnit || department || 'your unit'}</span>.
+              Select the Goals you want to adopt, then click <strong>Adopt Selected Goals</strong>.
             </p>
           </div>
 
@@ -777,7 +778,7 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
                 <div key={persp}>
                   <div className="flex items-center gap-2 mb-2">
                     <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${colorClass}`}>{persp}</span>
-                    <span className="text-[10px] text-slate-400">Bobot perspektif: {PERSPECTIVE_WEIGHTS[persp]}%</span>
+                    <span className="text-[10px] text-slate-400">Perspective weight: {PERSPECTIVE_WEIGHTS[persp]}%</span>
                   </div>
                   <div className="space-y-2">
                     {group.map((s) => {
@@ -829,7 +830,7 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
               onClick={() => setAiSuggestions(null)}
               className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200 transition-colors cursor-pointer"
             >
-              Batal
+              Cancel
             </button>
             <button
               onClick={handleAdoptSuggestions}
@@ -837,7 +838,7 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
               className="px-5 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <CheckCircle2 className="w-3.5 h-3.5" />
-              Adopsi Goal Terpilih ({selectedSuggestions.size})
+              Adopt Selected Goals ({selectedSuggestions.size})
             </button>
           </div>
         </div>
@@ -851,14 +852,17 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
     return (
       <div className="pb-12">
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="flex flex-col items-center justify-center py-20 px-6 text-center gap-5">
-            <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center">
+          <div
+            className="flex flex-col items-center justify-center py-20 px-6 text-center gap-5"
+            style={{ backgroundImage: 'radial-gradient(circle, #e2e8f0 1px, transparent 1px)', backgroundSize: '20px 20px' }}
+          >
+            <div className="w-16 h-16 rounded-2xl bg-white border border-slate-200 flex items-center justify-center shadow-sm">
               <Target className="w-8 h-8 text-slate-300" />
             </div>
             <div>
-              <h2 className="text-lg font-black text-slate-800">Belum ada Goal yang ditetapkan</h2>
+              <h2 className="text-lg font-black text-slate-800">No Goals Configured Yet</h2>
               <p className="text-sm text-slate-500 mt-1 max-w-md">
-                Goal FY 2026 Anda belum dikonfigurasi oleh sistem. Pilih salah satu cara untuk memulai:
+                Your FY 2026 Goals haven't been set up yet — choose how to get started.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 mt-2">
@@ -874,15 +878,15 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
                 className="flex items-center gap-2 px-5 py-3 rounded-xl bg-white border border-slate-200 text-slate-700 text-sm font-bold hover:bg-slate-50 transition-colors cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
-                Tambah Goal Manual
+                Add Goal Manually
               </button>
             </div>
             <div className="mt-2 flex items-start gap-2 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 max-w-md text-left">
               <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
               <p className="text-[11px] text-amber-700">
-                <span className="font-bold">Generate by AI</span> akan membuat saran Goal berdasarkan posisi{' '}
-                <span className="font-bold">{position}</span> dan unit bisnis{' '}
-                <span className="font-bold">{businessUnit || 'Anda'}</span> secara otomatis.
+                <span className="font-bold">Generate by AI</span> will suggest Goals based on your position{' '}
+                <span className="font-bold">{position}</span> and business unit{' '}
+                <span className="font-bold">{businessUnit || 'automatically'}</span>.
               </p>
             </div>
           </div>
@@ -926,7 +930,7 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/20 border border-white/30 text-white text-xs font-bold hover:bg-white/30 transition-colors cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
-              Tambah Goal
+              Add Goal
             </button>
             <button
               onClick={handleGenerateByAi}
@@ -979,7 +983,7 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
         if (group.length === 0) return null;
         const perspData = perspectiveScores.find((p) => p.perspective === perspective);
         const isCollapsed = collapsedGroups[perspective];
-        const colorClass = PERSPECTIVE_COLORS[perspective];
+        const colorClass = PERSPECTIVE_COLORS[perspective as Perspective] ?? 'bg-slate-50 text-slate-700 border-slate-200';
 
         return (
           <div key={perspective} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -990,7 +994,7 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
               <div className="flex items-center gap-3">
                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold border ${colorClass}`}>{perspective}</span>
                 <span className="text-[11px] text-slate-500 font-semibold">
-                  Bobot: {PERSPECTIVE_WEIGHTS[perspective]}% &nbsp;|&nbsp; KPI: {group.length}
+                  Weight: {PERSPECTIVE_WEIGHTS[perspective as Perspective] ?? 0}% &nbsp;|&nbsp; KPIs: {group.length}
                 </span>
               </div>
               <div className="flex items-center gap-3">
@@ -1008,7 +1012,7 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-slate-50 border-t border-b border-slate-100">
-                      {['Goal Name', 'UOM', 'Weight', 'Target YTD', 'Actual YTD', 'Achievement', 'Score', 'Actions'].map((h) => (
+                      {['Goal Name', 'Unit of Measure', 'Weight', 'Target YTD', 'Actual YTD', 'Achievement', 'Score', 'Actions'].map((h) => (
                         <th key={h} className="px-4 py-3 text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">{h}</th>
                       ))}
                     </tr>
@@ -1098,7 +1102,7 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
                   className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold hover:bg-indigo-100 transition-colors cursor-pointer shrink-0"
                 >
                   <Eye className="w-3.5 h-3.5" />
-                  Lihat Detail
+                  View Detail
                 </button>
               </div>
             </div>
@@ -1109,7 +1113,7 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
       {/* Enter Actual Modal */}
       {editingKpi && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-100 flex items-start justify-between gap-4 shrink-0">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-500">Enter Actual</p>
@@ -1190,7 +1194,7 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
         const kpiActuals = actuals[detailKpi.id] ?? ({} as Record<PeriodKey, PeriodActual>);
         return (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden">
               <div className="px-6 py-4 border-b border-slate-100 flex items-start justify-between gap-4 shrink-0">
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-500">{detailKpi.perspective}</p>
@@ -1201,7 +1205,7 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
               </div>
               <div className="overflow-y-auto flex-1 px-6 py-4">
                 <div className="grid grid-cols-3 gap-3 mb-5">
-                  {[{ label: 'UOM', val: detailKpi.uom }, { label: 'Weight', val: String(detailKpi.weight) }, { label: 'Aggregation', val: detailKpi.targetType }].map(({ label, val }) => (
+                  {[{ label: 'Unit of Measure', val: detailKpi.uom }, { label: 'Weight', val: String(detailKpi.weight) }, { label: 'Aggregation', val: detailKpi.targetType }].map(({ label, val }) => (
                     <div key={label} className="bg-slate-50 rounded-xl p-3">
                       <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400">{label}</p>
                       <p className="text-sm font-bold text-slate-800 mt-0.5">{val}</p>
@@ -1265,7 +1269,7 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
         if (!rec) return null;
         return (
           <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 backdrop-blur-sm overflow-y-auto py-8 px-4">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl flex flex-col overflow-hidden">
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-5xl flex flex-col overflow-hidden">
               {/* Header */}
               <div className={`bg-gradient-to-br ${overallBg(rec.overallScore)} text-white px-6 py-5`}>
                 <div className="flex items-center justify-between mb-4">
@@ -1310,7 +1314,7 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
                 <table className="w-full text-xs border-separate border-spacing-0 min-w-[640px]">
                   <thead>
                     <tr className="text-left">
-                      {['Goal / KPI Name', 'Perspective', 'UOM', 'Wt', 'Target', 'Actual', 'Achievement', 'Score'].map((h) => (
+                      {['Goal / KPI Name', 'Perspective', 'Unit of Measure', 'Wt', 'Target', 'Actual', 'Achievement', 'Score'].map((h) => (
                         <th key={h} className="px-3 py-2.5 text-[9px] font-bold uppercase tracking-wider text-slate-400 bg-slate-50 first:rounded-l-xl last:rounded-r-xl border-b border-slate-200 whitespace-nowrap">
                           {h}
                         </th>
@@ -1356,7 +1360,7 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
                   onClick={() => setHistoryDetailYear(null)}
                   className="px-5 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200 transition-colors cursor-pointer"
                 >
-                  Tutup
+                  Close
                 </button>
               </div>
             </div>
@@ -1382,11 +1386,11 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({ form, error, onChange, onSa
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-100 flex items-start justify-between gap-4 shrink-0">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-500">Manual Entry</p>
-            <h3 className="text-sm font-black text-slate-900 mt-0.5">Tambah Goal</h3>
+            <h3 className="text-sm font-black text-slate-900 mt-0.5">Add Goal</h3>
           </div>
           <button onClick={onClose} className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 cursor-pointer"><X className="w-4 h-4" /></button>
         </div>
@@ -1419,11 +1423,21 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({ form, error, onChange, onSa
               <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Perspective</label>
               <select
                 value={form.perspective}
-                onChange={(e) => set('perspective', e.target.value as Perspective)}
+                onChange={(e) => set('perspective', e.target.value)}
                 className="mt-1 w-full text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300"
               >
                 {PERSPECTIVE_ORDER.map((p) => <option key={p} value={p}>{p}</option>)}
+                <option value="Other">Other (Custom)</option>
               </select>
+              {form.perspective === 'Other' && (
+                <input
+                  type="text"
+                  value={form.perspectiveCustom}
+                  onChange={(e) => set('perspectiveCustom', e.target.value)}
+                  placeholder="Enter custom perspective name..."
+                  className="mt-2 w-full text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                />
+              )}
             </div>
             <div>
               <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Weight <span className="text-red-500">*</span></label>
@@ -1439,7 +1453,7 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({ form, error, onChange, onSa
           {/* UOM + Target Type */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">UOM <span className="text-red-500">*</span></label>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Unit of Measure <span className="text-red-500">*</span></label>
               <input
                 type="text"
                 value={form.uom}
@@ -1472,7 +1486,7 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({ form, error, onChange, onSa
               placeholder="e.g. 90 (applied equally to all 12 periods)"
               className="mt-1 w-full text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300"
             />
-            <p className="text-[10px] text-slate-400 mt-1">Nilai ini akan digunakan sebagai target untuk setiap periode (Jan–Dec).</p>
+            <p className="text-[10px] text-slate-400 mt-1">This value will be used as the target for each period (Jan–Dec).</p>
           </div>
           {/* Higher is Better */}
           <div className="flex items-center gap-3">
@@ -1485,16 +1499,16 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({ form, error, onChange, onSa
             </button>
             <div>
               <p className="text-xs font-bold text-slate-700">{form.higherIsBetter ? 'Higher is Better' : 'Lower is Better'}</p>
-              <p className="text-[10px] text-slate-400">{form.higherIsBetter ? 'Semakin tinggi aktual, semakin baik skornya.' : 'Semakin rendah aktual, semakin baik skornya.'}</p>
+              <p className="text-[10px] text-slate-400">{form.higherIsBetter ? 'A higher actual means a better score.' : 'A lower actual means a better score.'}</p>
             </div>
           </div>
           {error && <p className="text-xs font-semibold text-red-600 bg-red-50 px-3 py-2 rounded-xl">{error}</p>}
         </div>
         <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-2 shrink-0">
-          <button onClick={onClose} className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200 transition-colors cursor-pointer">Batal</button>
+          <button onClick={onClose} className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200 transition-colors cursor-pointer">Cancel</button>
           <button onClick={onSave} className="px-5 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 transition-colors flex items-center gap-1.5 cursor-pointer">
             <Plus className="w-3.5 h-3.5" />
-            Tambah Goal
+            Add Goal
           </button>
         </div>
       </div>
