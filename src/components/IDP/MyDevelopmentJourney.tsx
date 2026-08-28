@@ -226,7 +226,7 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
           className="rounded-3xl border border-blue-200 shadow-lg overflow-hidden"
           style={{
             backgroundColor: '#f0f7ff',
-            backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cline x1='24' y1='44' x2='24' y2='26' stroke='%2322c55e' stroke-width='1.8' stroke-linecap='round' opacity='0.22'/%3E%3Cpath d='M24 36 Q16 30 14 22 Q21 22 24 30' fill='%234ade80' opacity='0.18'/%3E%3Cpath d='M24 30 Q32 24 34 16 Q27 16 24 24' fill='%2316a34a' opacity='0.18'/%3E%3C/svg%3E\")",
+            backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cline x1='24' y1='44' x2='24' y2='26' stroke='%2394a3b8' stroke-width='1.8' stroke-linecap='round' opacity='0.15'/%3E%3Cpath d='M24 36 Q16 30 14 22 Q21 22 24 30' fill='%23cbd5e1' opacity='0.12'/%3E%3Cpath d='M24 30 Q32 24 34 16 Q27 16 24 24' fill='%23cbd5e1' opacity='0.12'/%3E%3C/svg%3E\")",
             backgroundSize: '48px 48px',
           }}
         >
@@ -234,14 +234,9 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
           <div className="px-10 sm:px-20 py-12 flex flex-col items-center text-center">
 
             {/* 1. MDJ Logo */}
-            <div className="w-24 h-24 rounded-2xl bg-white border border-blue-100 flex items-center justify-center shadow-md mb-6 overflow-hidden">
-              <img src={mdjLogo} alt="My Development Journey Logo" className="w-full h-full object-contain p-2" />
-            </div>
+            <img src={mdjLogo} alt="My Development Journey Logo" className="w-48 h-48 object-contain mb-4" />
 
-            {/* 2. Invitation title */}
-            <h2 className="text-3xl font-extrabold text-slate-800 leading-tight">
-              My Development Journey
-            </h2>
+            {/* 2. Tagline */}
             <p className="mt-2 text-base text-blue-600 font-medium">
               Start creating your personalized learning and development plan.
             </p>
