@@ -18,7 +18,7 @@ import {
   Save,
   AlertCircle,
 } from 'lucide-react';
-import mdjLogo from '../../assets/images/mdj_logo_vector_1787760001788.jpg';
+import mdjLogo from '../../assets/images/mdj_logo.png';
 import {
   IndividualDevelopmentPlan,
   DevelopmentActivity,
