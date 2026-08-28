@@ -14,6 +14,7 @@ import {
   Sparkles,
   Plus,
   Loader2,
+  Clock,
 } from 'lucide-react';
 import { UserProfile } from '../types';
 
@@ -44,6 +45,24 @@ type ActualsMap = Record<string, Record<PeriodKey, PeriodActual>>;
 
 interface MyGoalViewProps {
   currentUser?: UserProfile;
+}
+
+interface GoalHistoryKpi {
+  name: string;
+  perspective: Perspective;
+  weight: number;
+  uom: string;
+  ytdTarget: number;
+  ytdActual: number;
+  achievement: number;
+  score: number;
+}
+
+interface GoalHistoryRecord {
+  year: number;
+  overallScore: number;
+  perspectiveScores: { perspective: Perspective; score: number; weight: number }[];
+  kpis: GoalHistoryKpi[];
 }
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -515,6 +534,32 @@ function distributeTarget(value: number): Record<PeriodKey, number> {
   return Object.fromEntries(PERIODS.map((p) => [p, value])) as Record<PeriodKey, number>;
 }
 
+// ─── Goal History (dummy 2025 data) ──────────────────────────────────────────
+
+const GOAL_HISTORY: GoalHistoryRecord[] = [
+  {
+    year: 2025,
+    overallScore: 3.22,
+    perspectiveScores: [
+      { perspective: 'Customers', score: 3.12, weight: 30 },
+      { perspective: 'Finance', score: 3.31, weight: 25 },
+      { perspective: 'Internal Process', score: 3.28, weight: 30 },
+      { perspective: 'Learning & Growth', score: 3.14, weight: 15 },
+    ],
+    kpis: [
+      { name: 'Customer Satisfaction Score (CSAT)', perspective: 'Customers', weight: 15, uom: 'Score (1–5)', ytdTarget: 4.50, ytdActual: 4.20, achievement: 93.3, score: 3.10 },
+      { name: 'Customer Complaint Resolution Rate', perspective: 'Customers', weight: 15, uom: '%', ytdTarget: 93.0, ytdActual: 94.0, achievement: 101.1, score: 3.14 },
+      { name: 'Revenue Achievement', perspective: 'Finance', weight: 15, uom: '%', ytdTarget: 100.0, ytdActual: 97.5, achievement: 97.5, score: 3.18 },
+      { name: 'Cost Efficiency Ratio', perspective: 'Finance', weight: 10, uom: '%', ytdTarget: 10.0, ytdActual: 8.8, achievement: 112.0, score: 3.50 },
+      { name: 'Process Cycle Time Reduction', perspective: 'Internal Process', weight: 10, uom: 'Days', ytdTarget: 5.0, ytdActual: 5.4, achievement: 92.6, score: 3.20 },
+      { name: 'SOP Compliance Rate', perspective: 'Internal Process', weight: 10, uom: '%', ytdTarget: 95.0, ytdActual: 93.5, achievement: 98.4, score: 3.15 },
+      { name: 'Digital Initiative Completion', perspective: 'Internal Process', weight: 10, uom: '%', ytdTarget: 80.0, ytdActual: 84.0, achievement: 105.0, score: 3.50 },
+      { name: 'Training Completion Rate', perspective: 'Learning & Growth', weight: 8, uom: '%', ytdTarget: 90.0, ytdActual: 94.0, achievement: 104.4, score: 3.30 },
+      { name: 'Individual Capability Assessment', perspective: 'Learning & Growth', weight: 7, uom: 'Score (1–5)', ytdTarget: 3.50, ytdActual: 3.15, achievement: 90.0, score: 2.95 },
+    ],
+  },
+];
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 const BLANK_ACTUALS = (kpiId: string): Record<PeriodKey, PeriodActual> =>
@@ -567,6 +612,9 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
 
   // ── Detail modal ─────────────────────────────────────────────────────────
   const [detailKpi, setDetailKpi] = useState<KpiDefinition | null>(null);
+
+  // ── History modal ─────────────────────────────────────────────────────────
+  const [historyDetailYear, setHistoryDetailYear] = useState<number | null>(null);
 
   // ── Score calculations ────────────────────────────────────────────────────
 
@@ -810,7 +858,7 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
             <div>
               <h2 className="text-lg font-black text-slate-800">Belum ada Goal yang ditetapkan</h2>
               <p className="text-sm text-slate-500 mt-1 max-w-md">
-                Goal FY 2025 Anda belum dikonfigurasi oleh sistem. Pilih salah satu cara untuk memulai:
+                Goal FY 2026 Anda belum dikonfigurasi oleh sistem. Pilih salah satu cara untuk memulai:
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 mt-2">
@@ -868,7 +916,7 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
             </div>
             <div>
               <p className="text-[11px] font-bold uppercase tracking-widest text-white/70">Annual Scorecard</p>
-              <h1 className="text-lg font-black text-white leading-tight">My Goal — FY 2025</h1>
+              <h1 className="text-lg font-black text-white leading-tight">My Goal — FY 2026</h1>
             </div>
           </div>
           <div className="flex items-center gap-3 flex-wrap">
@@ -895,7 +943,7 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
                 className="appearance-none pl-3 pr-8 py-2 rounded-xl bg-white/20 border border-white/30 text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-white/40 cursor-pointer"
               >
                 {PERIODS.map((p) => (
-                  <option key={p} value={p} className="text-slate-800 bg-white">{p} 2025</option>
+                  <option key={p} value={p} className="text-slate-800 bg-white">{p} 2026</option>
                 ))}
               </select>
               <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/70 pointer-events-none" />
@@ -1015,6 +1063,49 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
         );
       })}
 
+      {/* Goal History Section */}
+      {GOAL_HISTORY.length > 0 && (
+        <div className="space-y-3 pt-2">
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-slate-400" />
+            <h2 className="text-xs font-black text-slate-500 uppercase tracking-widest">My Goal History</h2>
+          </div>
+          {GOAL_HISTORY.map((rec) => (
+            <div key={rec.year} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="flex flex-col items-center justify-center w-14 h-14 rounded-xl bg-slate-100 border border-slate-200 shrink-0">
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">FY</span>
+                    <span className="text-lg font-black text-slate-700">{rec.year}</span>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Overall Score</p>
+                    <p className={`text-2xl font-black leading-tight ${scoreColor(rec.overallScore)}`}>{rec.overallScore.toFixed(2)}</p>
+                    <p className="text-[10px] text-slate-400 mt-0.5">out of 5.00</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap flex-1">
+                  {rec.perspectiveScores.map(({ perspective, score, weight }) => (
+                    <div key={perspective} className="flex flex-col items-center bg-slate-50 rounded-xl px-3 py-2 border border-slate-100 min-w-[76px]">
+                      <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400 text-center truncate w-full">{perspective.split(' ')[0]}</p>
+                      <p className="text-[9px] text-slate-400">{weight}%</p>
+                      <p className={`text-base font-black mt-0.5 ${scoreColor(score)}`}>{score.toFixed(2)}</p>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setHistoryDetailYear(rec.year)}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold hover:bg-indigo-100 transition-colors cursor-pointer shrink-0"
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                  Lihat Detail
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Enter Actual Modal */}
       {editingKpi && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
@@ -1046,7 +1137,7 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
                 return (
                   <div key={period} className={`grid grid-cols-12 gap-2 items-center rounded-xl px-3 py-2 ${isPast ? 'bg-slate-50' : 'bg-white border border-dashed border-slate-200'}`}>
                     <div className="col-span-2">
-                      <span className={`text-[11px] font-bold ${isPast ? 'text-slate-700' : 'text-slate-400'}`}>{period} 2025</span>
+                      <span className={`text-[11px] font-bold ${isPast ? 'text-slate-700' : 'text-slate-400'}`}>{period} 2026</span>
                     </div>
                     <div className="col-span-2 text-right text-[11px] text-slate-500 font-semibold">{target.toFixed(2)}</div>
                     <div className="col-span-3">
@@ -1167,6 +1258,111 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
           onClose={() => { setShowAddForm(false); setAddFormError(''); setAddForm(DEFAULT_ADD_FORM); }}
         />
       )}
+
+      {/* History Detail Modal */}
+      {historyDetailYear !== null && (() => {
+        const rec = GOAL_HISTORY.find((r) => r.year === historyDetailYear);
+        if (!rec) return null;
+        return (
+          <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 backdrop-blur-sm overflow-y-auto py-8 px-4">
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl flex flex-col overflow-hidden">
+              {/* Header */}
+              <div className={`bg-gradient-to-br ${overallBg(rec.overallScore)} text-white px-6 py-5`}>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-white/20">
+                      <Target className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-white/70">Goal Performance Record</p>
+                      <h2 className="text-base font-black text-white">My Goal — FY {rec.year}</h2>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setHistoryDetailYear(null)}
+                    className="p-2 rounded-xl bg-white/20 hover:bg-white/30 transition-colors cursor-pointer"
+                  >
+                    <X className="w-4 h-4 text-white" />
+                  </button>
+                </div>
+                {/* Overall score + perspective tiles */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <div className="bg-white/20 rounded-2xl px-5 py-3 flex flex-col items-center min-w-[100px]">
+                    <p className="text-[9px] font-bold uppercase tracking-widest text-white/70">Overall Score</p>
+                    <p className="text-3xl font-black text-white">{rec.overallScore.toFixed(2)}</p>
+                    <p className="text-[9px] text-white/60">out of 5.00</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2 flex-1">
+                    {rec.perspectiveScores.map(({ perspective, score, weight }) => (
+                      <div key={perspective} className="bg-white/20 rounded-xl px-3 py-2 flex flex-col items-center min-w-[80px]">
+                        <p className="text-[8px] font-bold uppercase tracking-wider text-white/70 text-center">{perspective.split(' ').slice(0, 2).join(' ')}</p>
+                        <p className="text-[9px] text-white/60">{weight}%</p>
+                        <p className="text-xl font-black text-white">{score.toFixed(2)}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* KPI Table */}
+              <div className="px-6 py-5 overflow-x-auto">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">KPI Breakdown</p>
+                <table className="w-full text-xs border-separate border-spacing-0 min-w-[640px]">
+                  <thead>
+                    <tr className="text-left">
+                      {['Goal / KPI Name', 'Perspective', 'UOM', 'Wt', 'Target', 'Actual', 'Achievement', 'Score'].map((h) => (
+                        <th key={h} className="px-3 py-2.5 text-[9px] font-bold uppercase tracking-wider text-slate-400 bg-slate-50 first:rounded-l-xl last:rounded-r-xl border-b border-slate-200 whitespace-nowrap">
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rec.kpis.map((kpi, idx) => {
+                      const ach = kpi.achievement;
+                      const achColor = ach >= 100 ? 'text-emerald-600' : ach >= 90 ? 'text-amber-600' : 'text-red-600';
+                      const TrendIcon = ach >= 100 ? TrendingUp : ach >= 90 ? Minus : TrendingDown;
+                      return (
+                        <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'}>
+                          <td className="px-3 py-3 font-semibold text-slate-800 max-w-[220px]">{kpi.name}</td>
+                          <td className="px-3 py-3">
+                            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${PERSPECTIVE_COLORS[kpi.perspective]}`}>
+                              {kpi.perspective.split(' ')[0]}
+                            </span>
+                          </td>
+                          <td className="px-3 py-3 text-slate-500 whitespace-nowrap">{kpi.uom}</td>
+                          <td className="px-3 py-3 text-slate-600 font-bold text-center">{kpi.weight}%</td>
+                          <td className="px-3 py-3 text-slate-700 font-semibold text-center">{kpi.ytdTarget.toFixed(2)}</td>
+                          <td className="px-3 py-3 text-slate-700 font-semibold text-center">{kpi.ytdActual.toFixed(2)}</td>
+                          <td className="px-3 py-3 text-center">
+                            <span className={`flex items-center justify-center gap-1 font-bold ${achColor}`}>
+                              <TrendIcon className="w-3 h-3 shrink-0" />
+                              {ach.toFixed(1)}%
+                            </span>
+                          </td>
+                          <td className="px-3 py-3 text-center">
+                            <span className={`text-sm font-black ${scoreColor(kpi.score)}`}>{kpi.score.toFixed(2)}</span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Footer */}
+              <div className="px-6 py-4 border-t border-slate-100 flex justify-end">
+                <button
+                  onClick={() => setHistoryDetailYear(null)}
+                  className="px-5 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold hover:bg-slate-200 transition-colors cursor-pointer"
+                >
+                  Tutup
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };
