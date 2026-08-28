@@ -221,90 +221,114 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
   if (journeyView === 'WELCOME') {
     return (
       <div className="pb-12">
-        <div className="rounded-3xl bg-white border border-slate-200 shadow-lg p-10 sm:p-14 text-center">
-          {/* Icon */}
-          <div className="flex justify-center mb-7">
-            <div className="w-24 h-24 rounded-3xl bg-emerald-50 border border-emerald-200 flex items-center justify-center shadow-sm">
-              <Sprout className="w-12 h-12 text-emerald-500" />
+        {/* Card with dot-grid background pattern */}
+        <div
+          className="rounded-3xl border border-slate-200 shadow-lg overflow-hidden"
+          style={{
+            backgroundColor: '#ffffff',
+            backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)',
+            backgroundSize: '22px 22px',
+          }}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-2">
+
+            {/* ── LEFT: intro + CTA ── */}
+            <div className="p-10 sm:p-12 flex flex-col justify-center">
+              {/* Icon */}
+              <div className="flex mb-6">
+                <div className="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center shadow-sm">
+                  <Sprout className="w-8 h-8 text-emerald-500" />
+                </div>
+              </div>
+
+              {/* Title */}
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-800 leading-tight">
+                Ayo Buat My Development Journey!
+              </h2>
+
+              {/* Motivational quote */}
+              <blockquote className="mt-5 text-sm text-slate-500 italic leading-relaxed border-l-2 border-emerald-300 pl-4">
+                "An investment in knowledge pays the best interest."
+                <br />
+                <span className="text-slate-400 not-italic text-xs font-medium">— Benjamin Franklin</span>
+              </blockquote>
+
+              {/* Description */}
+              <p className="mt-5 text-sm text-slate-600 leading-relaxed">
+                AI akan menganalisa profil, skill gaps, dan tujuan kariermu untuk menyusun rencana pengembangan yang dipersonalisasi menggunakan framework{' '}
+                <strong className="text-indigo-600">70:20:10</strong>.
+              </p>
+
+              {/* Feature pills */}
+              <div className="flex flex-wrap gap-2 mt-5">
+                {['Analisa Skill Gaps', 'Rekomendasi Programme', 'Framework 70:20:10', 'Dipersonalisasi AI'].map((f) => (
+                  <span key={f} className="text-[11px] font-semibold px-3 py-1 rounded-full bg-white/70 border border-slate-200 text-slate-600">
+                    {f}
+                  </span>
+                ))}
+              </div>
+
+              {/* CTA */}
+              <div className="mt-8">
+                <button
+                  onClick={() => setJourneyView('AI_SETUP')}
+                  className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm shadow-lg transition-all cursor-pointer"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Mulai Journey Saya
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
-          </div>
 
-          {/* Title */}
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-800 leading-tight">
-            Ayo Buat My Development Journey!
-          </h2>
+            {/* ── RIGHT: 70:20:10 framework ── */}
+            <div className="bg-white/60 border-t lg:border-t-0 lg:border-l border-slate-200 p-8 sm:p-10 flex flex-col justify-center gap-3">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Apa itu Framework 70:20:10?</p>
 
-          {/* Motivational quote */}
-          <blockquote className="mt-5 text-sm text-slate-500 italic leading-relaxed max-w-lg mx-auto border-l-2 border-emerald-300 pl-4 text-left">
-            "An investment in knowledge pays the best interest."
-            <br />
-            <span className="text-slate-400 not-italic text-xs font-medium">— Benjamin Franklin</span>
-          </blockquote>
-
-          {/* Description */}
-          <p className="mt-6 text-sm text-slate-600 leading-relaxed max-w-md mx-auto">
-            AI akan menganalisa profil, skill gaps, dan tujuan kariermu untuk menyusun rencana pengembangan yang dipersonalisasi menggunakan framework{' '}
-            <strong className="text-indigo-600">70:20:10</strong>.
-          </p>
-
-          {/* Feature pills */}
-          <div className="flex flex-wrap justify-center gap-2 mt-5">
-            {['Analisa Skill Gaps', 'Rekomendasi Programme', 'Framework 70:20:10', 'Dipersonalisasi AI'].map((f) => (
-              <span key={f} className="text-[11px] font-semibold px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600">
-                {f}
-              </span>
-            ))}
-          </div>
-
-          {/* 70:20:10 Framework explanation */}
-          <div className="mt-8 w-full max-w-xl mx-auto text-left">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest text-center mb-3">Apa itu Framework 70:20:10?</p>
-            <div className="grid grid-cols-3 gap-3">
               {/* 70 */}
-              <div className="rounded-2xl bg-amber-50 border border-amber-200 p-3.5 flex flex-col gap-1.5">
-                <div className="text-2xl font-extrabold text-amber-500 leading-none">70%</div>
-                <div className="text-[11px] font-bold text-amber-700 uppercase tracking-wide">Experience</div>
-                <p className="text-[11px] text-amber-800/80 leading-relaxed">Belajar langsung dari pekerjaan nyata: project, tantangan baru, rotasi peran, dan tanggung jawab tambahan.</p>
-                <div className="mt-auto pt-2 flex flex-col gap-1">
-                  {['On-the-job project', 'Rotasi/stretch role', 'Strategic Project'].map((ex) => (
-                    <span key={ex} className="text-[10px] text-amber-700 flex items-start gap-1"><span className="mt-0.5 shrink-0">▸</span>{ex}</span>
-                  ))}
+              <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4 flex gap-4 items-start">
+                <div className="text-3xl font-extrabold text-amber-400 leading-none w-14 shrink-0 pt-0.5">70%</div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[11px] font-bold text-amber-700 uppercase tracking-wide mb-1">Experience</div>
+                  <p className="text-[11px] text-amber-800/80 leading-relaxed">Belajar langsung dari pekerjaan nyata: project, tantangan baru, dan rotasi peran.</p>
+                  <div className="mt-2 flex flex-wrap gap-x-3 gap-y-0.5">
+                    {['On-the-job project', 'Rotasi/stretch role', 'Strategic Project'].map((ex) => (
+                      <span key={ex} className="text-[10px] text-amber-700 flex items-center gap-1"><span className="shrink-0">▸</span>{ex}</span>
+                    ))}
+                  </div>
                 </div>
               </div>
+
               {/* 20 */}
-              <div className="rounded-2xl bg-indigo-50 border border-indigo-200 p-3.5 flex flex-col gap-1.5">
-                <div className="text-2xl font-extrabold text-indigo-500 leading-none">20%</div>
-                <div className="text-[11px] font-bold text-indigo-700 uppercase tracking-wide">Exposure</div>
-                <p className="text-[11px] text-indigo-800/80 leading-relaxed">Belajar dari orang lain melalui interaksi, observasi, dan kolaborasi bersama rekan atau mentor.</p>
-                <div className="mt-auto pt-2 flex flex-col gap-1">
-                  {['Mentoring / coaching', 'Shadowing senior', 'Peer feedback & diskusi'].map((ex) => (
-                    <span key={ex} className="text-[10px] text-indigo-700 flex items-start gap-1"><span className="mt-0.5 shrink-0">▸</span>{ex}</span>
-                  ))}
+              <div className="rounded-2xl bg-indigo-50 border border-indigo-200 p-4 flex gap-4 items-start">
+                <div className="text-3xl font-extrabold text-indigo-400 leading-none w-14 shrink-0 pt-0.5">20%</div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[11px] font-bold text-indigo-700 uppercase tracking-wide mb-1">Exposure</div>
+                  <p className="text-[11px] text-indigo-800/80 leading-relaxed">Belajar dari orang lain melalui interaksi, observasi, dan kolaborasi bersama mentor.</p>
+                  <div className="mt-2 flex flex-wrap gap-x-3 gap-y-0.5">
+                    {['Mentoring / coaching', 'Shadowing senior', 'Peer feedback & diskusi'].map((ex) => (
+                      <span key={ex} className="text-[10px] text-indigo-700 flex items-center gap-1"><span className="shrink-0">▸</span>{ex}</span>
+                    ))}
+                  </div>
                 </div>
               </div>
+
               {/* 10 */}
-              <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-3.5 flex flex-col gap-1.5">
-                <div className="text-2xl font-extrabold text-emerald-500 leading-none">10%</div>
-                <div className="text-[11px] font-bold text-emerald-700 uppercase tracking-wide">Education</div>
-                <p className="text-[11px] text-emerald-800/80 leading-relaxed">Pembelajaran terstruktur melalui pelatihan formal, kelas, e-learning, dan sertifikasi.</p>
-                <div className="mt-auto pt-2 flex flex-col gap-1">
-                  {['Training & workshop', 'E-learning / kelas', 'Sertifikasi profesional'].map((ex) => (
-                    <span key={ex} className="text-[10px] text-emerald-700 flex items-start gap-1"><span className="mt-0.5 shrink-0">▸</span>{ex}</span>
-                  ))}
+              <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-4 flex gap-4 items-start">
+                <div className="text-3xl font-extrabold text-emerald-400 leading-none w-14 shrink-0 pt-0.5">10%</div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[11px] font-bold text-emerald-700 uppercase tracking-wide mb-1">Education</div>
+                  <p className="text-[11px] text-emerald-800/80 leading-relaxed">Pembelajaran terstruktur melalui pelatihan formal, kelas, e-learning, dan sertifikasi.</p>
+                  <div className="mt-2 flex flex-wrap gap-x-3 gap-y-0.5">
+                    {['Training & workshop', 'E-learning / kelas', 'Sertifikasi profesional'].map((ex) => (
+                      <span key={ex} className="text-[10px] text-emerald-700 flex items-center gap-1"><span className="shrink-0">▸</span>{ex}</span>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* CTA */}
-          <button
-            onClick={() => setJourneyView('AI_SETUP')}
-            className="mt-9 inline-flex items-center gap-2.5 px-9 py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm shadow-lg transition-all cursor-pointer"
-          >
-            <Sparkles className="w-4 h-4" />
-            Mulai Journey Saya
-            <ArrowRight className="w-4 h-4" />
-          </button>
+          </div>
         </div>
       </div>
     );
