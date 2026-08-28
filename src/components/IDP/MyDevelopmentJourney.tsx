@@ -109,11 +109,9 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
     return () => clearInterval(timer);
   }, [journeyView]);
 
-  const handleApplyAIPlan = (newActivities: DevelopmentActivity[], objective: string, businessGoal: string) => {
+  const handleApplyAIPlan = (newActivities: DevelopmentActivity[]) => {
     const updated: IndividualDevelopmentPlan = {
       ...idp,
-      primaryObjective: objective,
-      businessGoalAlignment: businessGoal,
       activities: newActivities,
       status: 'DRAFT',
       updatedAt: new Date().toISOString(),
@@ -518,8 +516,7 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
 
     const handleConfirmReview = () => {
       const chosen = pendingActivities.filter((a) => selectedIds.includes(a.id));
-      const businessGoal = `Aligned to Group 2026 Digital North Star and ${currentUser.businessUnit} strategic priorities.`;
-      handleApplyAIPlan(chosen, pendingObjective, businessGoal);
+      handleApplyAIPlan(chosen);
       setJourneyView('JOURNEY');
     };
 
