@@ -59,7 +59,7 @@ export const MyProfileView: React.FC<MyProfileViewProps> = ({ currentUser, onUpd
   };
 
   return (
-    <div className="pb-12 max-w-5xl mx-auto space-y-6">
+    <div className="pb-12 space-y-6">
 
       {/* ── Personal Information ── */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
