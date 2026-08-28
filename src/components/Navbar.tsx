@@ -10,12 +10,15 @@ import {
   Compass,
   CheckCircle2,
   AlertCircle,
-  Clock,
   Home,
+  MapPin,
+  BookOpen,
+  User,
+  Users,
+  Shield,
 } from 'lucide-react';
 import { UserRole, UserProfile, NavigationTab } from '../types';
-
-import { MDJLogo } from './MDJLogo';
+import mdjLogo from '../assets/images/mdj_logo.png';
 
 interface NavbarProps {
   currentUser: UserProfile;
@@ -34,7 +37,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   activeTab = 'home',
   onRoleChange,
   onOpenAIDevelopmentAdvisor,
-  onOpenAICoach,
   onNavigate,
   pendingReviewsCount = 0,
 }) => {
@@ -72,70 +74,98 @@ export const Navbar: React.FC<NavbarProps> = ({
     },
   ];
 
-  return (
-    <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-slate-200/80 shadow-2xs">
-      <div className="w-full px-3 sm:px-6 lg:px-8 xl:px-10 2xl:px-12">
-        <div className="flex items-center justify-between h-16 sm:h-18">
-          
-          {/* Logo & Gradient Title & Home Button */}
-          <div className="flex items-center gap-3 sm:gap-4 select-none">
-            <div
-              className="flex items-center gap-3 sm:gap-3.5 cursor-pointer group"
-              onClick={() => onNavigate && onNavigate('home')}
-            >
-              <div className="w-12 h-12 sm:w-14 sm:h-14 shrink-0 flex items-center justify-center p-0.5 rounded-2xl bg-white border border-slate-100 shadow-xs transition-transform group-hover:scale-105">
-                <MDJLogo />
-              </div>
-              <h1 className="text-xl sm:text-2xl lg:text-[26px] font-black tracking-tight bg-gradient-to-r from-blue-600 via-indigo-600 to-teal-500 bg-clip-text text-transparent leading-none">
-                My Development Journey
-              </h1>
-            </div>
+  // Primary nav tabs (all roles)
+  const mainNavTabs: { id: NavigationTab; label: string; icon: any; badge?: string }[] = [
+    { id: 'home', label: 'Home', icon: Home },
+    { id: 'journey', label: 'My Development', icon: MapPin },
+    { id: 'skills', label: 'My Skill', icon: Layers },
+    { id: 'growcard', label: 'My Grow Card', icon: User },
+    { id: 'coach', label: 'My AI Coach', icon: Sparkles, badge: 'AI' },
+    { id: 'catalogue', label: 'Development Catalogue', icon: BookOpen },
+  ];
 
-            {/* Home button */}
-            {onNavigate && (
-              <button
-                type="button"
-                id="nav-home-btn"
-                onClick={() => onNavigate('journey')}
-                title="My Development Journey"
-                className={`flex items-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer border ${
-                  activeTab === 'journey'
-                    ? 'bg-indigo-900 text-white shadow-xs border-indigo-800'
-                    : 'bg-slate-100/90 hover:bg-slate-200/80 text-slate-700 hover:text-slate-950 border-slate-200/80'
-                }`}
-              >
-                <Home className={`w-3.5 h-3.5 ${activeTab === 'journey' ? 'text-indigo-200' : 'text-slate-500'}`} />
-                <span>Home</span>
-              </button>
-            )}
+  // Role-specific tabs appended conditionally
+  if (activeRole === 'MANAGER' || activeRole === 'ADMIN') {
+    mainNavTabs.push({
+      id: 'team',
+      label: 'Team Validation',
+      icon: Users,
+      badge: pendingReviewsCount > 0 ? `${pendingReviewsCount}` : undefined,
+    });
+  }
+  if (activeRole === 'HRBP' || activeRole === 'ADMIN') {
+    mainNavTabs.push({ id: 'hrbp', label: 'HRBP', icon: Shield });
+  }
+
+  return (
+    <header className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm">
+      <div className="w-full px-3 sm:px-6 lg:px-8 xl:px-10 2xl:px-12">
+        <div className="flex items-center justify-between h-16 gap-4">
+
+          {/* ── Left: Logo ── */}
+          <div
+            className="flex items-center shrink-0 cursor-pointer"
+            onClick={() => onNavigate && onNavigate('home')}
+          >
+            <img
+              src={mdjLogo}
+              alt="My Development Journey"
+              className="h-12 w-auto object-contain"
+            />
           </div>
 
-          {/* Center / Right controls */}
-          <div className="flex items-center gap-2.5 sm:gap-3">
-            
-            {/* Quick AI Advisor CTA */}
-            {onOpenAIDevelopmentAdvisor && (
-              <button
-                id="nav-quick-ai-advisor-btn"
-                onClick={onOpenAIDevelopmentAdvisor}
-                className="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-indigo-50 hover:bg-indigo-100 text-indigo-950 text-xs font-bold border border-indigo-200 shadow-2xs transition-all cursor-pointer"
-              >
-                <Sparkles className="w-4 h-4 text-indigo-600" />
-                <span>AI 70:20:10 Advisor</span>
-              </button>
-            )}
+          {/* ── Center: Nav Links ── */}
+          <nav className="hidden md:flex items-center gap-0.5 flex-1 overflow-x-auto no-scrollbar">
+            {mainNavTabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  id={`nav-tab-${tab.id}`}
+                  onClick={() => onNavigate && onNavigate(tab.id)}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-indigo-900 text-white shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  }`}
+                >
+                  <Icon
+                    className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-indigo-200' : 'text-slate-400'}`}
+                  />
+                  <span>{tab.label}</span>
+                  {tab.badge && (
+                    <span
+                      className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
+                        isActive
+                          ? 'bg-indigo-400/20 text-indigo-200 border border-indigo-400/30'
+                          : tab.id === 'team'
+                          ? 'bg-orange-100 text-orange-800 border border-orange-200 animate-pulse'
+                          : 'bg-amber-100 text-amber-900 border border-amber-200'
+                      }`}
+                    >
+                      {tab.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
 
-            {/* Role Switcher Pill (Bento RBAC Selector) */}
+          {/* ── Right: Role Switcher | Bell | Profile ── */}
+          <div className="flex items-center gap-2 shrink-0">
+
+            {/* Role Switcher */}
             <div className="relative">
               <button
                 id="nav-role-switcher-btn"
                 onClick={() => setShowRoleDropdown(!showRoleDropdown)}
-                className="flex items-center gap-2 px-3 py-1.5 sm:py-2 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold text-slate-800 shadow-2xs transition-all cursor-pointer"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-[11px] font-bold text-slate-700 shadow-sm transition-all cursor-pointer"
               >
-                <span className="w-2 h-2 rounded-full bg-emerald-500 ring-4 ring-emerald-100" />
-                <span className="text-slate-400 font-normal uppercase tracking-wider text-[10px]">Role:</span>
-                <span className="text-indigo-900 font-bold">{activeRole}</span>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                <span className="w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-emerald-100" />
+                <span className="hidden sm:inline text-slate-400 font-normal uppercase tracking-wider text-[10px]">Role:</span>
+                <span className="text-indigo-800 font-bold">{activeRole}</span>
+                <ChevronDown className="w-3 h-3 text-slate-400" />
               </button>
 
               {showRoleDropdown && (
@@ -179,12 +209,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
             </div>
 
-            {/* Notifications */}
+            {/* Notifications Bell */}
             <div className="relative">
               <button
                 id="nav-notification-btn"
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="relative p-2 rounded-2xl text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border border-slate-200/80 shadow-2xs transition-colors cursor-pointer"
+                className="relative p-2 rounded-xl text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-100 border border-slate-200 shadow-sm transition-colors cursor-pointer"
               >
                 <Bell className="w-4 h-4" />
                 {pendingReviewsCount > 0 && (
@@ -238,16 +268,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
             </div>
 
-            {/* Profile Avatar Bento Pill */}
+            {/* Profile Avatar */}
             <div
               id="nav-profile-pill"
               onClick={() => onNavigate && onNavigate('growcard')}
-              className="flex items-center gap-3 bg-white p-1.5 sm:p-2 sm:pr-5 rounded-full border border-slate-200 shadow-2xs hover:border-indigo-300 transition-all cursor-pointer"
+              className="flex items-center gap-2 bg-white p-1.5 pr-3 rounded-full border border-slate-200 shadow-sm hover:border-indigo-300 transition-all cursor-pointer"
             >
               <img
                 src={currentUser.avatar}
                 alt={currentUser.name}
-                className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover ring-2 ring-indigo-100"
+                className="w-8 h-8 rounded-full object-cover ring-2 ring-indigo-100"
               />
               <div className="hidden lg:flex flex-col text-left">
                 <span className="text-xs font-bold text-slate-900 leading-tight">{currentUser.name}</span>
@@ -256,10 +286,32 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
 
           </div>
+        </div>
+      </div>
 
+      {/* Mobile Nav (md breakpoint and below) */}
+      <div className="md:hidden overflow-x-auto border-t border-slate-100 no-scrollbar">
+        <div className="flex items-center gap-1 px-3 py-2">
+          {mainNavTabs.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => onNavigate && onNavigate(tab.id)}
+                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                  isActive
+                    ? 'bg-indigo-900 text-white'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <Icon className={`w-3 h-3 ${isActive ? 'text-indigo-200' : 'text-slate-400'}`} />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </header>
   );
 };
-

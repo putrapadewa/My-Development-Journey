@@ -18,7 +18,6 @@ import {
   DevelopmentActivity,
 } from './types';
 import { Navbar } from './components/Navbar';
-import { Navigation } from './components/Navigation';
 import { ProfileHeaderCard } from './components/ProfileHeaderCard';
 import { EmployeeHome } from './components/Home/EmployeeHome';
 import { MyDevelopmentJourney } from './components/IDP/MyDevelopmentJourney';
@@ -205,7 +204,7 @@ export function App() {
         onOpenAIDevelopmentAdvisor={() => setIsAIAdvisorOpen(true)}
       />
 
-      {/* 2. Top Profile Box (Directly below Title/Navbar, before menu navigation) */}
+      {/* 2. Top Profile Box (Directly below Navbar) */}
       <div className="w-full px-3 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 pt-5">
         <ProfileHeaderCard
           currentUser={currentUser}
@@ -213,17 +212,7 @@ export function App() {
         />
       </div>
 
-      {/* 3. Persona Role & View Navigation Tabs (After Profile Box) */}
-      <div className="mt-4">
-        <Navigation
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          activeRole={currentUser.activeRole}
-          pendingReviewCount={activeIdp.status === 'WAITING_FOR_APPROVAL' ? 1 : 0}
-        />
-      </div>
-
-      {/* 4. Main Body Container */}
+      {/* 3. Main Body Container */}
       <main className="flex-1 w-full px-3 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 pt-6">
         
         {/* EMPLOYEE HOME */}
