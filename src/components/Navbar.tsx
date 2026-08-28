@@ -74,14 +74,18 @@ export const Navbar: React.FC<NavbarProps> = ({
     },
   ];
 
-  // "My Development" group — journey, skills, coach share this top-level tab
-  const isInDevGroup = activeTab === 'journey' || activeTab === 'skills' || activeTab === 'coach';
+  // Group detection
+  const isInDevGroup =
+    activeTab === 'journey' || activeTab === 'skills' || activeTab === 'coach' ||
+    activeTab === 'assessment' || activeTab === 'devhistory';
+  const isInGrowthGroup = activeTab === 'growcard' || activeTab === 'career';
 
-  // 4 primary nav tabs (all roles)
+  // Primary nav tabs (all roles)
   const mainNavTabs: { id: NavigationTab; label: string; icon: any; badge?: string; groupActive?: boolean }[] = [
     { id: 'home', label: 'Home', icon: Home },
     { id: 'journey', label: 'My Development', icon: MapPin, groupActive: isInDevGroup },
-    { id: 'growcard', label: 'My Grow Card', icon: User },
+    { id: 'growcard', label: 'My Growth & Career', icon: User, groupActive: isInGrowthGroup },
+    { id: 'kpi', label: 'My KPI', icon: Layers },
     { id: 'catalogue', label: 'Development Catalogue', icon: BookOpen },
   ];
 

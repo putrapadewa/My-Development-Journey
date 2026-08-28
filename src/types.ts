@@ -261,8 +261,12 @@ export type NavigationTab =
   | 'journey'
   | 'coach'
   | 'skills'
+  | 'assessment'
+  | 'devhistory'
   | 'catalogue'
   | 'growcard'
+  | 'career'
+  | 'kpi'
   | 'team'
   | 'hrbp'
   | 'profile';

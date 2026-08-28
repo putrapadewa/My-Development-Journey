@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapPin, Layers, Sparkles } from 'lucide-react';
+import { MapPin, Layers, Sparkles, ClipboardList, History, TrendingUp, Target, BarChart3 } from 'lucide-react';
 import {
   INITIAL_USER_PROFILE,
   INITIAL_IDP,
@@ -214,28 +214,60 @@ export function App() {
         />
       </div>
 
-      {/* 3. My Development Sub-tabs — visible only when inside the dev group */}
-      {(activeTab === 'journey' || activeTab === 'skills' || activeTab === 'coach') && (
+      {/* 3a. My Development Sub-tabs */}
+      {(activeTab === 'journey' || activeTab === 'skills' || activeTab === 'coach' || activeTab === 'assessment' || activeTab === 'devhistory') && (
         <div className="bg-white border-b border-slate-200 mt-4">
           <div className="w-full px-3 sm:px-6 lg:px-8 xl:px-10 2xl:px-12">
-            <div className="flex items-center gap-1 py-2">
+            <div className="flex items-center gap-1 py-2 overflow-x-auto no-scrollbar">
               {[
-                { id: 'journey' as const, label: 'Development Plan', icon: MapPin },
+                { id: 'journey' as const, label: 'My Development Plan', icon: MapPin },
                 { id: 'skills' as const, label: 'My Skill', icon: Layers },
-                { id: 'coach' as const, label: 'AI Coach', icon: Sparkles },
+                { id: 'assessment' as const, label: 'My Assessment', icon: ClipboardList },
+                { id: 'devhistory' as const, label: 'My Dev History', icon: History },
+                { id: 'coach' as const, label: 'My AI Coach', icon: Sparkles },
               ].map(({ id, label, icon: Icon }) => {
                 const isActive = activeTab === id;
                 return (
                   <button
                     key={id}
                     onClick={() => setActiveTab(id)}
-                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                       isActive
                         ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
                         : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100 border border-transparent'
                     }`}
                   >
                     <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-indigo-500' : 'text-slate-400'}`} />
+                    <span>{label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3b. My Growth & Career Sub-tabs */}
+      {(activeTab === 'growcard' || activeTab === 'career') && (
+        <div className="bg-white border-b border-slate-200 mt-4">
+          <div className="w-full px-3 sm:px-6 lg:px-8 xl:px-10 2xl:px-12">
+            <div className="flex items-center gap-1 py-2">
+              {[
+                { id: 'growcard' as const, label: 'My Grow Card', icon: TrendingUp },
+                { id: 'career' as const, label: 'My Career Journey', icon: BarChart3 },
+              ].map(({ id, label, icon: Icon }) => {
+                const isActive = activeTab === id;
+                return (
+                  <button
+                    key={id}
+                    onClick={() => setActiveTab(id)}
+                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                      isActive
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                        : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100 border border-transparent'
+                    }`}
+                  >
+                    <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-emerald-500' : 'text-slate-400'}`} />
                     <span>{label}</span>
                   </button>
                 );
@@ -299,6 +331,50 @@ export function App() {
             onAddToJourney={handleAddProgramToJourney}
             onOpenAICoach={() => setActiveTab('coach')}
           />
+        )}
+
+        {/* MY ASSESSMENT */}
+        {activeTab === 'assessment' && (
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center mb-4">
+              <ClipboardList className="w-8 h-8 text-amber-500" />
+            </div>
+            <h2 className="text-xl font-black text-slate-800 mb-2">My Assessment</h2>
+            <p className="text-sm text-slate-500 max-w-md">Skill & competency assessment — halaman ini sedang dalam pengembangan.</p>
+          </div>
+        )}
+
+        {/* MY DEV HISTORY */}
+        {activeTab === 'devhistory' && (
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-violet-50 flex items-center justify-center mb-4">
+              <History className="w-8 h-8 text-violet-500" />
+            </div>
+            <h2 className="text-xl font-black text-slate-800 mb-2">My Dev History</h2>
+            <p className="text-sm text-slate-500 max-w-md">Rekam jejak aktivitas pengembangan yang telah selesai — halaman ini sedang dalam pengembangan.</p>
+          </div>
+        )}
+
+        {/* MY CAREER JOURNEY */}
+        {activeTab === 'career' && (
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center mb-4">
+              <BarChart3 className="w-8 h-8 text-emerald-500" />
+            </div>
+            <h2 className="text-xl font-black text-slate-800 mb-2">My Career Journey</h2>
+            <p className="text-sm text-slate-500 max-w-md">Jalur karier, aspirasi, dan mobilitas internal — halaman ini sedang dalam pengembangan.</p>
+          </div>
+        )}
+
+        {/* MY KPI */}
+        {activeTab === 'kpi' && (
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
+              <Target className="w-8 h-8 text-blue-500" />
+            </div>
+            <h2 className="text-xl font-black text-slate-800 mb-2">My KPI</h2>
+            <p className="text-sm text-slate-500 max-w-md">Target & pencapaian kinerja — halaman ini sedang dalam pengembangan.</p>
+          </div>
         )}
 
         {/* GROW CARD & TALENT PROFILE */}
