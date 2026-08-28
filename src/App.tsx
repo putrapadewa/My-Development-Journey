@@ -368,7 +368,7 @@ export function App() {
         )}
 
         {/* MY GOAL */}
-        {activeTab === 'kpi' && <MyGoalView />}
+        {activeTab === 'kpi' && <MyGoalView currentUser={currentUser} />}
 
         {/* GROW CARD & TALENT PROFILE */}
         {activeTab === 'growcard' && (
