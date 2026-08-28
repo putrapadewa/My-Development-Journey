@@ -1450,30 +1450,29 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({ form, error, onChange, onSa
               />
             </div>
           </div>
-          {/* UOM + Target Type */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Unit of Measure <span className="text-red-500">*</span></label>
-              <input
-                type="text"
-                value={form.uom}
-                onChange={(e) => set('uom', e.target.value)}
-                placeholder="e.g. %, Score, Units"
-                className="mt-1 w-full text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-              />
-            </div>
-            <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Aggregation</label>
-              <select
-                value={form.targetType}
-                onChange={(e) => set('targetType', e.target.value as TargetType)}
-                className="mt-1 w-full text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-              >
-                <option value="Average">Average</option>
-                <option value="Sum">Sum</option>
-                <option value="Last">Last</option>
-              </select>
-            </div>
+          {/* UOM */}
+          <div>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Unit of Measure <span className="text-red-500">*</span></label>
+            <input
+              type="text"
+              value={form.uom}
+              onChange={(e) => set('uom', e.target.value)}
+              placeholder="e.g. %, Score, Units"
+              className="mt-1 w-full text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            />
+          </div>
+          {/* Aggregation */}
+          <div>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Aggregation</label>
+            <select
+              value={form.targetType}
+              onChange={(e) => set('targetType', e.target.value as TargetType)}
+              className="mt-1 w-full text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            >
+              <option value="Average">Average</option>
+              <option value="Sum">Sum</option>
+              <option value="Last">Last</option>
+            </select>
           </div>
           {/* Annual Target */}
           <div>
