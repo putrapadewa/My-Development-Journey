@@ -10,7 +10,6 @@ import {
   Shield,
   Trash2,
   ExternalLink,
-  Sprout,
   ArrowRight,
   Target,
   Plus,
@@ -19,6 +18,7 @@ import {
   Save,
   AlertCircle,
 } from 'lucide-react';
+import mdjLogo from '../../assets/images/mdj_logo_vector_1787760001788.jpg';
 import {
   IndividualDevelopmentPlan,
   DevelopmentActivity,
@@ -221,28 +221,28 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
   if (journeyView === 'WELCOME') {
     return (
       <div className="pb-12">
-        {/* Card with dot-grid background pattern */}
+        {/* Card with sprout background pattern */}
         <div
-          className="rounded-3xl border border-slate-200 shadow-lg overflow-hidden"
+          className="rounded-3xl border border-blue-200 shadow-lg overflow-hidden"
           style={{
-            backgroundColor: '#ffffff',
-            backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)',
-            backgroundSize: '22px 22px',
+            backgroundColor: '#f0f7ff',
+            backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Cline x1='24' y1='44' x2='24' y2='26' stroke='%2322c55e' stroke-width='1.8' stroke-linecap='round' opacity='0.22'/%3E%3Cpath d='M24 36 Q16 30 14 22 Q21 22 24 30' fill='%234ade80' opacity='0.18'/%3E%3Cpath d='M24 30 Q32 24 34 16 Q27 16 24 24' fill='%2316a34a' opacity='0.18'/%3E%3C/svg%3E\")",
+            backgroundSize: '48px 48px',
           }}
         >
-          {/* ── 1-4: Icon, Title, Quote, Description ── */}
+          {/* ── 1-4: Logo, Title, Quote, Description ── */}
           <div className="px-10 sm:px-20 py-12 flex flex-col items-center text-center">
 
-            {/* 1. Sprout icon */}
-            <div className="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center shadow-sm mb-6">
-              <Sprout className="w-8 h-8 text-emerald-500" />
+            {/* 1. MDJ Logo */}
+            <div className="w-24 h-24 rounded-2xl bg-white border border-blue-100 flex items-center justify-center shadow-md mb-6 overflow-hidden">
+              <img src={mdjLogo} alt="My Development Journey Logo" className="w-full h-full object-contain p-2" />
             </div>
 
-            {/* 2. Invitation title (no model subtitle) */}
+            {/* 2. Invitation title */}
             <h2 className="text-3xl font-extrabold text-slate-800 leading-tight">
               My Development Journey
             </h2>
-            <p className="mt-2 text-base text-slate-500 font-medium">
+            <p className="mt-2 text-base text-blue-600 font-medium">
               Start creating your personalized learning and development plan.
             </p>
 
@@ -254,48 +254,48 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
 
             {/* 4. Description — wide (max-w-2xl ≈ 2 lines) */}
             <p className="mt-4 max-w-2xl text-sm text-slate-600 leading-relaxed">
-              AI will analyze your profile, skill gaps, and career goals to help build a personalized development plan using the <strong className="text-indigo-600">70:20:10 Learning and Development</strong> model.
+              AI will analyze your profile, skill gaps, and career goals to help build a personalized development plan using the <strong className="text-blue-700">70:20:10 Learning and Development</strong> model.
             </p>
 
           </div>
 
           {/* ── 5: What is the 70:20:10 L&D Model? ── */}
-          <div className="bg-white/60 border-t border-slate-200 px-10 sm:px-20 py-8">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest text-center mb-5">What is the 70:20:10 Learning and Development Model?</p>
+          <div className="bg-white/70 border-t border-blue-100 px-10 sm:px-20 py-8">
+            <p className="text-xs font-bold text-blue-400 uppercase tracking-widest text-center mb-5">What is the 70:20:10 Learning and Development Model?</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
               {/* 70% */}
-              <div className="rounded-2xl bg-amber-50 border border-amber-200 p-5">
-                <div className="text-4xl font-extrabold text-amber-400 leading-none mb-2">70%</div>
-                <div className="text-sm font-bold text-amber-700 mb-2">Experience</div>
-                <p className="text-sm text-amber-800/80 leading-relaxed mb-3">Learn directly from real work: projects, new challenges, and role rotations.</p>
+              <div className="rounded-2xl bg-blue-50 border border-blue-200 p-5">
+                <div className="text-4xl font-extrabold text-blue-500 leading-none mb-2">70%</div>
+                <div className="text-sm font-bold text-blue-700 mb-2">Experience</div>
+                <p className="text-sm text-blue-800/80 leading-relaxed mb-3">Learn directly from real work: projects, new challenges, and role rotations.</p>
                 <div className="flex flex-col gap-1">
                   {['On-the-job project', 'Rotation / stretch role', 'Strategic project'].map((ex) => (
-                    <span key={ex} className="text-sm text-amber-700 flex items-center gap-1.5"><span className="shrink-0">▸</span>{ex}</span>
+                    <span key={ex} className="text-sm text-blue-700 flex items-center gap-1.5"><span className="shrink-0">▸</span>{ex}</span>
                   ))}
                 </div>
               </div>
 
               {/* 20% */}
-              <div className="rounded-2xl bg-indigo-50 border border-indigo-200 p-5">
-                <div className="text-4xl font-extrabold text-indigo-400 leading-none mb-2">20%</div>
-                <div className="text-sm font-bold text-indigo-700 mb-2">Exposure</div>
-                <p className="text-sm text-indigo-800/80 leading-relaxed mb-3">Learn from others through interaction, observation, and collaboration with mentors.</p>
+              <div className="rounded-2xl bg-sky-50 border border-sky-200 p-5">
+                <div className="text-4xl font-extrabold text-sky-500 leading-none mb-2">20%</div>
+                <div className="text-sm font-bold text-sky-700 mb-2">Exposure</div>
+                <p className="text-sm text-sky-800/80 leading-relaxed mb-3">Learn from others through interaction, observation, and collaboration with mentors.</p>
                 <div className="flex flex-col gap-1">
                   {['Mentoring / coaching', 'Shadowing senior', 'Peer feedback & discussion'].map((ex) => (
-                    <span key={ex} className="text-sm text-indigo-700 flex items-center gap-1.5"><span className="shrink-0">▸</span>{ex}</span>
+                    <span key={ex} className="text-sm text-sky-700 flex items-center gap-1.5"><span className="shrink-0">▸</span>{ex}</span>
                   ))}
                 </div>
               </div>
 
               {/* 10% */}
-              <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-5">
-                <div className="text-4xl font-extrabold text-emerald-400 leading-none mb-2">10%</div>
-                <div className="text-sm font-bold text-emerald-700 mb-2">Education</div>
-                <p className="text-sm text-emerald-800/80 leading-relaxed mb-3">Structured learning through formal training, classes, e-learning, and certifications.</p>
+              <div className="rounded-2xl bg-green-50 border border-green-200 p-5">
+                <div className="text-4xl font-extrabold text-green-500 leading-none mb-2">10%</div>
+                <div className="text-sm font-bold text-green-700 mb-2">Education</div>
+                <p className="text-sm text-green-800/80 leading-relaxed mb-3">Structured learning through formal training, classes, e-learning, and certifications.</p>
                 <div className="flex flex-col gap-1">
                   {['Training & workshop', 'E-learning / class', 'Professional certification'].map((ex) => (
-                    <span key={ex} className="text-sm text-emerald-700 flex items-center gap-1.5"><span className="shrink-0">▸</span>{ex}</span>
+                    <span key={ex} className="text-sm text-green-700 flex items-center gap-1.5"><span className="shrink-0">▸</span>{ex}</span>
                   ))}
                 </div>
               </div>
@@ -304,10 +304,10 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
           </div>
 
           {/* ── 6-7: CTA button + feature pills ── */}
-          <div className="bg-white/40 border-t border-slate-200 px-10 sm:px-20 py-8 flex flex-col items-center gap-4">
+          <div className="bg-blue-50/60 border-t border-blue-100 px-10 sm:px-20 py-8 flex flex-col items-center gap-4">
             <button
               onClick={() => setJourneyView('AI_SETUP')}
-              className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm shadow-lg transition-all cursor-pointer"
+              className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-2xl bg-blue-700 hover:bg-blue-800 text-white font-extrabold text-sm shadow-lg transition-all cursor-pointer"
             >
               <Sparkles className="w-4 h-4" />
               Create My Development Journey
@@ -315,7 +315,7 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
             </button>
             <div className="flex flex-wrap justify-center gap-2">
               {['Personalized by AI', 'Skill Gap Analysis', '70:20:10 Model', 'Programme Recommendations'].map((f) => (
-                <span key={f} className="text-xs font-semibold px-3 py-1 rounded-full bg-white/70 border border-slate-200 text-slate-600">
+                <span key={f} className="text-xs font-semibold px-3 py-1 rounded-full bg-white/80 border border-blue-200 text-blue-700">
                   {f}
                 </span>
               ))}
