@@ -33,6 +33,7 @@ import { AIRecommendationModal } from './components/IDP/AIRecommendationModal';
 import { triggerMilestoneCelebration } from './utils/confetti';
 import { ProfileSubMenu } from './components/GrowCard/GrowCardProfileHub';
 import { MyProfileView } from './components/MyProfileView';
+import { MyGoalView } from './components/MyGoalView';
 
 export function App() {
   const [currentUser, setCurrentUser] = useState<UserProfile>(INITIAL_USER_PROFILE);
@@ -366,16 +367,8 @@ export function App() {
           </div>
         )}
 
-        {/* MY KPI */}
-        {activeTab === 'kpi' && (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center mb-4">
-              <Target className="w-8 h-8 text-blue-500" />
-            </div>
-            <h2 className="text-xl font-black text-slate-800 mb-2">My KPI</h2>
-            <p className="text-sm text-slate-500 max-w-md">Target & pencapaian kinerja — halaman ini sedang dalam pengembangan.</p>
-          </div>
-        )}
+        {/* MY GOAL */}
+        {activeTab === 'kpi' && <MyGoalView />}
 
         {/* GROW CARD & TALENT PROFILE */}
         {activeTab === 'growcard' && (

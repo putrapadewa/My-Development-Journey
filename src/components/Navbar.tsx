@@ -6,7 +6,7 @@ import {
   UserCheck,
   Briefcase,
   ShieldCheck,
-  Layers,
+  Target,
   Compass,
   CheckCircle2,
   AlertCircle,
@@ -85,7 +85,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'home', label: 'Home', icon: Home },
     { id: 'journey', label: 'My Development', icon: MapPin, groupActive: isInDevGroup },
     { id: 'growcard', label: 'My Growth & Career', icon: User, groupActive: isInGrowthGroup },
-    { id: 'kpi', label: 'My KPI', icon: Layers },
+    { id: 'kpi', label: 'My Goal', icon: Target },
     { id: 'catalogue', label: 'Development Catalogue', icon: BookOpen },
   ];
 
