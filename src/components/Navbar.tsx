@@ -74,13 +74,14 @@ export const Navbar: React.FC<NavbarProps> = ({
     },
   ];
 
-  // Primary nav tabs (all roles)
-  const mainNavTabs: { id: NavigationTab; label: string; icon: any; badge?: string }[] = [
+  // "My Development" group — journey, skills, coach share this top-level tab
+  const isInDevGroup = activeTab === 'journey' || activeTab === 'skills' || activeTab === 'coach';
+
+  // 4 primary nav tabs (all roles)
+  const mainNavTabs: { id: NavigationTab; label: string; icon: any; badge?: string; groupActive?: boolean }[] = [
     { id: 'home', label: 'Home', icon: Home },
-    { id: 'journey', label: 'My Development', icon: MapPin },
-    { id: 'skills', label: 'My Skill', icon: Layers },
+    { id: 'journey', label: 'My Development', icon: MapPin, groupActive: isInDevGroup },
     { id: 'growcard', label: 'My Grow Card', icon: User },
-    { id: 'coach', label: 'My AI Coach', icon: Sparkles, badge: 'AI' },
     { id: 'catalogue', label: 'Development Catalogue', icon: BookOpen },
   ];
 
@@ -118,7 +119,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           <nav className="hidden md:flex items-center gap-0.5 flex-1 overflow-x-auto no-scrollbar">
             {mainNavTabs.map((tab) => {
               const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
+              // "My Development" tab stays highlighted for all sub-tabs (journey/skills/coach)
+              const isActive = tab.groupActive !== undefined ? tab.groupActive : activeTab === tab.id;
               return (
                 <button
                   key={tab.id}
