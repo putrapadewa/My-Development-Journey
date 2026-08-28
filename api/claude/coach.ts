@@ -56,6 +56,9 @@ Return ONLY valid JSON (no markdown):
     let jsonText = text.trim();
     const mdMatch = jsonText.match(/```(?:json)?\s*([\s\S]*?)```/);
     if (mdMatch) jsonText = mdMatch[1].trim();
+    const firstBrace = jsonText.indexOf('{');
+    const lastBrace = jsonText.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace > firstBrace) jsonText = jsonText.substring(firstBrace, lastBrace + 1);
     res.json(JSON.parse(jsonText));
   } catch (err: any) {
     console.error('Coach error:', err);

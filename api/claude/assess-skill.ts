@@ -51,6 +51,9 @@ Generate 2-3 challenging scenario-based questions appropriate for the proficienc
     let jsonText = text.trim();
     const mdMatch = jsonText.match(/```(?:json)?\s*([\s\S]*?)```/);
     if (mdMatch) jsonText = mdMatch[1].trim();
+    const firstBrace = jsonText.indexOf('{');
+    const lastBrace = jsonText.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace > firstBrace) jsonText = jsonText.substring(firstBrace, lastBrace + 1);
     res.json(JSON.parse(jsonText));
   } catch (err: any) {
     console.error('Assessment error:', err);
