@@ -230,92 +230,71 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
             backgroundSize: '22px 22px',
           }}
         >
-          {/* ── HERO: centered intro + CTA ── */}
+          {/* ── 1-4: Icon, Title, Quote, Description ── */}
           <div className="px-10 sm:px-20 py-12 flex flex-col items-center text-center">
-            {/* Icon */}
+
+            {/* 1. Sprout icon */}
             <div className="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center shadow-sm mb-6">
               <Sprout className="w-8 h-8 text-emerald-500" />
             </div>
 
-            {/* Title */}
+            {/* 2. Invitation title (no model subtitle) */}
             <h2 className="text-3xl font-extrabold text-slate-800 leading-tight">
               My Development Journey
             </h2>
-
-            {/* Model name */}
-            <p className="mt-2 text-base font-semibold text-indigo-600 tracking-wide">
-              70:20:10 Learning and Development Model
+            <p className="mt-2 text-base text-slate-500 font-medium">
+              Start creating your personalized learning and development plan.
             </p>
 
-            {/* Motivational quote */}
-            <blockquote className="mt-5 max-w-lg text-sm text-slate-500 italic leading-relaxed">
+            {/* 3. Motivational quote */}
+            <blockquote className="mt-6 max-w-lg text-sm text-slate-500 italic leading-relaxed">
               "An investment in knowledge pays the best interest."
               <span className="block text-slate-400 not-italic text-xs font-medium mt-1">— Benjamin Franklin</span>
             </blockquote>
 
-            {/* Description */}
-            <p className="mt-4 max-w-xl text-sm text-slate-600 leading-relaxed">
-              AI akan menganalisa profil, skill gaps, dan tujuan kariermu untuk menyusun rencana pengembangan yang dipersonalisasi menggunakan model <strong className="text-indigo-600">70:20:10 Learning and Development</strong>.
+            {/* 4. Description — wide (max-w-2xl ≈ 2 lines) */}
+            <p className="mt-4 max-w-2xl text-sm text-slate-600 leading-relaxed">
+              AI will analyze your profile, skill gaps, and career goals to help build a personalized development plan using the <strong className="text-indigo-600">70:20:10 Learning and Development</strong> model.
             </p>
 
-            {/* Feature pills */}
-            <div className="flex flex-wrap justify-center gap-2 mt-5">
-              {['Skill Gap Analysis', 'Programme Recommendations', '70:20:10 Model', 'Personalized by AI'].map((f) => (
-                <span key={f} className="text-xs font-semibold px-3 py-1 rounded-full bg-white/70 border border-slate-200 text-slate-600">
-                  {f}
-                </span>
-              ))}
-            </div>
-
-            {/* CTA */}
-            <div className="mt-8">
-              <button
-                onClick={() => setJourneyView('AI_SETUP')}
-                className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm shadow-lg transition-all cursor-pointer"
-              >
-                <Sparkles className="w-4 h-4" />
-                Create My Development Journey
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
           </div>
 
-          {/* ── FRAMEWORK: 3-column cards ── */}
+          {/* ── 5: What is the 70:20:10 L&D Model? ── */}
           <div className="bg-white/60 border-t border-slate-200 px-10 sm:px-20 py-8">
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest text-center mb-5">What is the 70:20:10 Learning and Development Model?</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-              {/* 70 */}
+              {/* 70% */}
               <div className="rounded-2xl bg-amber-50 border border-amber-200 p-5">
                 <div className="text-4xl font-extrabold text-amber-400 leading-none mb-2">70%</div>
                 <div className="text-sm font-bold text-amber-700 mb-2">Experience</div>
-                <p className="text-sm text-amber-800/80 leading-relaxed mb-3">Belajar langsung dari pekerjaan nyata: project, tantangan baru, dan rotasi peran.</p>
+                <p className="text-sm text-amber-800/80 leading-relaxed mb-3">Learn directly from real work: projects, new challenges, and role rotations.</p>
                 <div className="flex flex-col gap-1">
-                  {['On-the-job project', 'Rotasi/stretch role', 'Strategic Project'].map((ex) => (
+                  {['On-the-job project', 'Rotation / stretch role', 'Strategic project'].map((ex) => (
                     <span key={ex} className="text-sm text-amber-700 flex items-center gap-1.5"><span className="shrink-0">▸</span>{ex}</span>
                   ))}
                 </div>
               </div>
 
-              {/* 20 */}
+              {/* 20% */}
               <div className="rounded-2xl bg-indigo-50 border border-indigo-200 p-5">
                 <div className="text-4xl font-extrabold text-indigo-400 leading-none mb-2">20%</div>
                 <div className="text-sm font-bold text-indigo-700 mb-2">Exposure</div>
-                <p className="text-sm text-indigo-800/80 leading-relaxed mb-3">Belajar dari orang lain melalui interaksi, observasi, dan kolaborasi bersama mentor.</p>
+                <p className="text-sm text-indigo-800/80 leading-relaxed mb-3">Learn from others through interaction, observation, and collaboration with mentors.</p>
                 <div className="flex flex-col gap-1">
-                  {['Mentoring / coaching', 'Shadowing senior', 'Peer feedback & diskusi'].map((ex) => (
+                  {['Mentoring / coaching', 'Shadowing senior', 'Peer feedback & discussion'].map((ex) => (
                     <span key={ex} className="text-sm text-indigo-700 flex items-center gap-1.5"><span className="shrink-0">▸</span>{ex}</span>
                   ))}
                 </div>
               </div>
 
-              {/* 10 */}
+              {/* 10% */}
               <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-5">
                 <div className="text-4xl font-extrabold text-emerald-400 leading-none mb-2">10%</div>
                 <div className="text-sm font-bold text-emerald-700 mb-2">Education</div>
-                <p className="text-sm text-emerald-800/80 leading-relaxed mb-3">Pembelajaran terstruktur melalui pelatihan formal, kelas, e-learning, dan sertifikasi.</p>
+                <p className="text-sm text-emerald-800/80 leading-relaxed mb-3">Structured learning through formal training, classes, e-learning, and certifications.</p>
                 <div className="flex flex-col gap-1">
-                  {['Training & workshop', 'E-learning / kelas', 'Sertifikasi profesional'].map((ex) => (
+                  {['Training & workshop', 'E-learning / class', 'Professional certification'].map((ex) => (
                     <span key={ex} className="text-sm text-emerald-700 flex items-center gap-1.5"><span className="shrink-0">▸</span>{ex}</span>
                   ))}
                 </div>
@@ -323,6 +302,26 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
 
             </div>
           </div>
+
+          {/* ── 6-7: CTA button + feature pills ── */}
+          <div className="bg-white/40 border-t border-slate-200 px-10 sm:px-20 py-8 flex flex-col items-center gap-4">
+            <button
+              onClick={() => setJourneyView('AI_SETUP')}
+              className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm shadow-lg transition-all cursor-pointer"
+            >
+              <Sparkles className="w-4 h-4" />
+              Create My Development Journey
+              <ArrowRight className="w-4 h-4" />
+            </button>
+            <div className="flex flex-wrap justify-center gap-2">
+              {['Skill Gap Analysis', 'Programme Recommendations', '70:20:10 Model', 'Personalized by AI'].map((f) => (
+                <span key={f} className="text-xs font-semibold px-3 py-1 rounded-full bg-white/70 border border-slate-200 text-slate-600">
+                  {f}
+                </span>
+              ))}
+            </div>
+          </div>
+
         </div>
       </div>
     );
