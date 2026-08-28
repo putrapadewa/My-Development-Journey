@@ -17,36 +17,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.json(getMockRecommendations(currentPosition, nextPosition, organizationGoal));
     }
 
-    const prompt = `You are the AI Development Recommendation Engine for "My Development Journey (MDJ)", an enterprise talent development platform.
-Generate a complete, personalized 70:20:10 Individual Development Plan (IDP) recommendation.
+    const prompt = `You are an IDP recommendation engine. Generate a 70:20:10 development plan for this employee.
 
-Employee Context:
-- Organization Goal: ${organizationGoal || 'Group 2026 Digital North Star'}
-- Individual KPI: ${individualKpi || 'Deliver zero-downtime microservices migration'}
-- Current Position: ${currentPosition || 'Lead Cloud Solutions Architect & Tech Lead'}
-- Business Unit: ${businessUnit || 'Digital Transformation & Enterprise Cloud BU'}
-- Areas of Improvement: ${areasOfImprovement || 'Executive Boardroom Influence, P&L Valuation, Strategic Architecture'}
-- Strengths: ${strengths || 'Distributed Systems, GenAI Engineering, Agile Scale'}
-- Career Aspiration: ${aspiration || 'Head of Enterprise Architecture'}
-- Next Position: ${nextPosition || 'Head of Enterprise Architecture'}
-- Target BU: ${targetBusinessUnit || 'Group Technology & Digital Transformation'}
-- Development History: ${developmentHistory || 'AWS Pro Architect, SAFe Consultant, FinOps Practitioner'}
+Context:
+- Position: ${currentPosition || 'Lead Cloud Solutions Architect'}
+- Business Unit: ${businessUnit || 'Digital Transformation BU'}
+- Areas to Improve: ${areasOfImprovement || 'Executive Leadership, Strategic Architecture'}
+- Strengths: ${strengths || 'Distributed Systems, GenAI Engineering'}
+- Aspiration: ${aspiration || 'Head of Enterprise Architecture'}
+- Org Goal: ${organizationGoal || 'Group 2026 Digital North Star'}
 
-Return ONLY valid JSON (no markdown) matching this schema:
-{
-  "confidenceScore": 95,
-  "prioritySkillGaps": [{ "skill": "string", "gap": 1.2, "rationale": "string" }],
-  "primaryObjective": "string",
-  "businessGoalAlignment": "string",
-  "recommendedActivities": [{
-    "id": "string", "goal": "string", "programName": "string", "provider": "string",
-    "frameworkType": "70_EXPERIENCE",
-    "timelineStart": "2026-03-01", "timelineEnd": "2026-06-30",
-    "measurement": "string", "skillNames": ["string"], "expectedImpact": "string",
-    "learningHours": 30, "xpValue": 300, "relevanceScore": 95
-  }]
-}
-Include at least one 70_EXPERIENCE, one 20_EXPOSURE, and one 10_LEARNING activity.`;
+Return ONLY a raw JSON object (no markdown, no backticks, no explanation). Use this exact structure with exactly 3 activities:
+{"primaryObjective":"string under 20 words","recommendedActivities":[{"goal":"string under 10 words","programName":"string under 8 words","provider":"string under 6 words","frameworkType":"70_EXPERIENCE","measurement":"string under 12 words","skillNames":["skill name"],"expectedImpact":"string under 8 words","learningHours":30},{"goal":"string","programName":"string","provider":"string","frameworkType":"20_EXPOSURE","measurement":"string under 12 words","skillNames":["skill name"],"expectedImpact":"string","learningHours":16},{"goal":"string","programName":"string","provider":"string","frameworkType":"10_LEARNING","measurement":"string under 12 words","skillNames":["skill name"],"expectedImpact":"string","learningHours":24}]}`;
 
     const message = await client.messages.create({
       model: 'claude-haiku-4-5',
