@@ -266,7 +266,7 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
                 <div className="text-[11px] font-bold text-amber-700 uppercase tracking-wide">Experience</div>
                 <p className="text-[11px] text-amber-800/80 leading-relaxed">Belajar langsung dari pekerjaan nyata: project, tantangan baru, rotasi peran, dan tanggung jawab tambahan.</p>
                 <div className="mt-auto pt-2 flex flex-col gap-1">
-                  {['On-the-job project', 'Rotasi / stretch role', 'Pimpin inisiatif baru'].map((ex) => (
+                  {['On-the-job project', 'Rotasi/stretch role', 'Strategic Project'].map((ex) => (
                     <span key={ex} className="text-[10px] text-amber-700 flex items-start gap-1"><span className="mt-0.5 shrink-0">▸</span>{ex}</span>
                   ))}
                 </div>
