@@ -86,6 +86,9 @@ export interface UserProfile {
   businessPillar?: string;
   psLevel?: string;
   yearsOfService?: number;
+  managerPersonnelNumber?: string;
+  hrbpPersonnelNumber?: string;
+  hrbpEmail?: string;
 }
 
 export interface SkillItem {
