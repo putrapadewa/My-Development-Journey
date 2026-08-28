@@ -314,7 +314,7 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
               <ArrowRight className="w-4 h-4" />
             </button>
             <div className="flex flex-wrap justify-center gap-2">
-              {['Skill Gap Analysis', 'Programme Recommendations', '70:20:10 Model', 'Personalized by AI'].map((f) => (
+              {['Personalized by AI', 'Skill Gap Analysis', '70:20:10 Model', 'Programme Recommendations'].map((f) => (
                 <span key={f} className="text-xs font-semibold px-3 py-1 rounded-full bg-white/70 border border-slate-200 text-slate-600">
                   {f}
                 </span>
