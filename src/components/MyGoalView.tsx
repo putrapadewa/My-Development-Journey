@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Target,
   ChevronDown,
@@ -634,9 +634,21 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
   const currentMonth = new Date().toLocaleString('en-US', { month: 'short' }) as PeriodKey;
   const defaultPeriod: PeriodKey = PERIODS.includes(currentMonth) ? currentMonth : 'Jun';
 
-  // ── Goal data ─────────────────────────────────────────────────────────────
-  const [kpiDefs, setKpiDefs] = useState<KpiDefinition[]>([]);
-  const [actuals, setActuals] = useState<ActualsMap>({});
+  const storageKey = `mygoal_${currentUser?.id ?? 'default'}`;
+
+  // ── Goal data (persisted to localStorage) ────────────────────────────────
+  const [kpiDefs, setKpiDefs] = useState<KpiDefinition[]>(() => {
+    try {
+      const raw = localStorage.getItem(`${storageKey}_kpidefs`);
+      return raw ? (JSON.parse(raw) as KpiDefinition[]) : [];
+    } catch { return []; }
+  });
+  const [actuals, setActuals] = useState<ActualsMap>(() => {
+    try {
+      const raw = localStorage.getItem(`${storageKey}_actuals`);
+      return raw ? (JSON.parse(raw) as ActualsMap) : {};
+    } catch { return {}; }
+  });
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodKey>(defaultPeriod);
   const [collapsedGroups, setCollapsedGroups] = useState<Record<Perspective, boolean>>({
     Customers: false,
@@ -644,6 +656,15 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
     'Internal Process': false,
     'Learning & Growth': false,
   });
+
+  // ── Persist kpiDefs & actuals to localStorage ────────────────────────────
+  useEffect(() => {
+    try { localStorage.setItem(`${storageKey}_kpidefs`, JSON.stringify(kpiDefs)); } catch {}
+  }, [kpiDefs, storageKey]);
+
+  useEffect(() => {
+    try { localStorage.setItem(`${storageKey}_actuals`, JSON.stringify(actuals)); } catch {}
+  }, [actuals, storageKey]);
 
   // ── AI generation ────────────────────────────────────────────────────────
   const [isAiLoading, setIsAiLoading] = useState(false);
