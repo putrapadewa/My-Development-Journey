@@ -256,6 +256,46 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
             ))}
           </div>
 
+          {/* 70:20:10 Framework explanation */}
+          <div className="mt-8 w-full max-w-xl mx-auto text-left">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest text-center mb-3">Apa itu Framework 70:20:10?</p>
+            <div className="grid grid-cols-3 gap-3">
+              {/* 70 */}
+              <div className="rounded-2xl bg-amber-50 border border-amber-200 p-3.5 flex flex-col gap-1.5">
+                <div className="text-2xl font-extrabold text-amber-500 leading-none">70%</div>
+                <div className="text-[11px] font-bold text-amber-700 uppercase tracking-wide">Experience</div>
+                <p className="text-[11px] text-amber-800/80 leading-relaxed">Belajar langsung dari pekerjaan nyata: project, tantangan baru, rotasi peran, dan tanggung jawab tambahan.</p>
+                <div className="mt-auto pt-2 flex flex-col gap-1">
+                  {['On-the-job project', 'Rotasi / stretch role', 'Pimpin inisiatif baru'].map((ex) => (
+                    <span key={ex} className="text-[10px] text-amber-700 flex items-start gap-1"><span className="mt-0.5 shrink-0">▸</span>{ex}</span>
+                  ))}
+                </div>
+              </div>
+              {/* 20 */}
+              <div className="rounded-2xl bg-indigo-50 border border-indigo-200 p-3.5 flex flex-col gap-1.5">
+                <div className="text-2xl font-extrabold text-indigo-500 leading-none">20%</div>
+                <div className="text-[11px] font-bold text-indigo-700 uppercase tracking-wide">Exposure</div>
+                <p className="text-[11px] text-indigo-800/80 leading-relaxed">Belajar dari orang lain melalui interaksi, observasi, dan kolaborasi bersama rekan atau mentor.</p>
+                <div className="mt-auto pt-2 flex flex-col gap-1">
+                  {['Mentoring / coaching', 'Shadowing senior', 'Peer feedback & diskusi'].map((ex) => (
+                    <span key={ex} className="text-[10px] text-indigo-700 flex items-start gap-1"><span className="mt-0.5 shrink-0">▸</span>{ex}</span>
+                  ))}
+                </div>
+              </div>
+              {/* 10 */}
+              <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-3.5 flex flex-col gap-1.5">
+                <div className="text-2xl font-extrabold text-emerald-500 leading-none">10%</div>
+                <div className="text-[11px] font-bold text-emerald-700 uppercase tracking-wide">Education</div>
+                <p className="text-[11px] text-emerald-800/80 leading-relaxed">Pembelajaran terstruktur melalui pelatihan formal, kelas, e-learning, dan sertifikasi.</p>
+                <div className="mt-auto pt-2 flex flex-col gap-1">
+                  {['Training & workshop', 'E-learning / kelas', 'Sertifikasi profesional'].map((ex) => (
+                    <span key={ex} className="text-[10px] text-emerald-700 flex items-start gap-1"><span className="mt-0.5 shrink-0">▸</span>{ex}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* CTA */}
           <button
             onClick={() => setJourneyView('AI_SETUP')}
