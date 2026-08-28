@@ -23,6 +23,8 @@ export type CapabilityRating =
 
 export interface EducationRecord {
   degree: string;
+  major?: string;
+  faculty?: string;
   institution: string;
   year: string;
 }
@@ -62,6 +64,7 @@ export interface UserProfile {
   activeRole: UserRole;
   managerId: string;
   managerName: string;
+  managerEmail?: string;
   hrbpId: string;
   hrbpName: string;
   joinDate: string;
@@ -72,6 +75,17 @@ export interface UserProfile {
   careerHistory: CareerRecord[];
   talentCommitteeResults: TalentCommitteeRecord[];
   yearsOfExperience: number;
+  // Extended profile fields
+  personnelNumber?: string;
+  globalId?: string;
+  nationality?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  religion?: string;
+  direktorat?: string;
+  businessPillar?: string;
+  psLevel?: string;
+  yearsOfService?: number;
 }
 
 export interface SkillItem {
@@ -247,4 +261,5 @@ export type NavigationTab =
   | 'catalogue'
   | 'growcard'
   | 'team'
-  | 'hrbp';
+  | 'hrbp'
+  | 'profile';

@@ -32,6 +32,7 @@ import { HRBPAdminHub } from './components/HRBP/HRBPAdminHub';
 import { AIRecommendationModal } from './components/IDP/AIRecommendationModal';
 import { triggerMilestoneCelebration } from './utils/confetti';
 import { ProfileSubMenu } from './components/GrowCard/GrowCardProfileHub';
+import { MyProfileView } from './components/MyProfileView';
 
 export function App() {
   const [currentUser, setCurrentUser] = useState<UserProfile>(INITIAL_USER_PROFILE);
@@ -327,6 +328,11 @@ export function App() {
             cataloguePrograms={cataloguePrograms}
             onAddNewProgram={handleAddNewCatalogueProgram}
           />
+        )}
+
+        {/* MY PROFILE */}
+        {activeTab === 'profile' && (
+          <MyProfileView currentUser={currentUser} />
         )}
 
       </main>

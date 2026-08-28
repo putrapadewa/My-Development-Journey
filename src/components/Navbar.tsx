@@ -273,7 +273,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Profile Avatar */}
             <div
               id="nav-profile-pill"
-              onClick={() => onNavigate && onNavigate('growcard')}
+              onClick={() => onNavigate && onNavigate('profile')}
               className="flex items-center gap-2 bg-white p-1.5 pr-3 rounded-full border border-slate-200 shadow-sm hover:border-indigo-300 transition-all cursor-pointer"
             >
               <img
