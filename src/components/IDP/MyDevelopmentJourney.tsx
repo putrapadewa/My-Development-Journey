@@ -91,6 +91,15 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
   const totalLearningHours = activities.reduce((acc, curr) => acc + (curr.learningHours || 0), 0);
   const totalXP = activities.reduce((acc, curr) => acc + (curr.xpValue || 0), 0);
 
+  // Derive banner content from selected activities so it stays in sync
+  const displayObjective = activities.length > 0
+    ? activities.map((a) => a.goal).join(' · ')
+    : (idp.primaryObjective || `${idp.period} Development Journey`);
+  const allSkillNames = [...new Set(activities.flatMap((a) => a.skillNames || []))];
+  const displayAlignment = activities.length > 0 && allSkillNames.length > 0
+    ? `Berfokus pada pengembangan: ${allSkillNames.join(', ')}.`
+    : idp.businessGoalAlignment;
+
   // Scan animation when entering AI_SETUP
   useEffect(() => {
     if (journeyView !== 'AI_SETUP') return;
@@ -806,10 +815,10 @@ export const MyDevelopmentJourney: React.FC<MyDevelopmentJourneyProps> = ({
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-extrabold text-white mt-3 leading-tight tracking-tight">
-              {idp.primaryObjective}
+              {displayObjective}
             </h1>
             <p className="text-xs sm:text-sm text-indigo-200/90 mt-2 max-w-3xl leading-relaxed">
-              <strong className="text-white">Business Alignment:</strong> {idp.businessGoalAlignment}
+              <strong className="text-white">Business Alignment:</strong> {displayAlignment}
             </p>
           </div>
 
