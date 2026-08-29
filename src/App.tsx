@@ -36,6 +36,7 @@ import { MyProfileView } from './components/MyProfileView';
 import { MyGoalView } from './components/MyGoalView';
 import { CareerJourneyView } from './components/GrowCard/CareerJourneyView';
 import { AssessmentView } from './components/Assessment/AssessmentView';
+import { DevHistoryView } from './components/DevHistoryView';
 
 export function App() {
   const [currentUser, setCurrentUser] = useState<UserProfile>(INITIAL_USER_PROFILE);
@@ -343,13 +344,11 @@ export function App() {
 
         {/* MY DEV HISTORY */}
         {activeTab === 'devhistory' && (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-violet-50 flex items-center justify-center mb-4">
-              <History className="w-8 h-8 text-violet-500" />
-            </div>
-            <h2 className="text-xl font-black text-slate-800 mb-2">My Dev History</h2>
-            <p className="text-sm text-slate-500 max-w-md">Rekam jejak aktivitas pengembangan yang telah selesai — halaman ini sedang dalam pengembangan.</p>
-          </div>
+          <DevHistoryView
+            user={currentUser}
+            idpHistory={idpHistory}
+            activeIdp={activeIdp}
+          />
         )}
 
         {/* MY CAREER JOURNEY */}

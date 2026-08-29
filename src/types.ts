@@ -201,6 +201,8 @@ export interface UserProfile {
   otherAssessments?: OtherAssessmentResult[];
   // Leadership DNA
   leadershipDNA?: LeadershipDNAProfile;
+  // Development Programs (Inclusive / Exclusive)
+  developmentPrograms?: DevelopmentProgramRecord[];
 }
 
 // ── Assessment Types ─────────────────────────────────────────────────────────
@@ -417,6 +419,21 @@ export interface AuditLogEntry {
   role: string;
   action: string;
   details: string;
+}
+
+export interface DevelopmentProgramRecord {
+  id: string;
+  programCode: string;    // e.g. "SMDP", "JNDP", "MDP"
+  programName: string;    // e.g. "Senior Manager Development Program"
+  batch: string;          // e.g. "Batch 12 / 2025"
+  organizer: string;      // e.g. "Corporate HR – Leadership Academy"
+  duration: string;       // e.g. "6 bulan"
+  startDate: string;
+  endDate: string;
+  category: 'INCLUSIVE' | 'EXCLUSIVE';
+  status: 'COMPLETED' | 'IN_PROGRESS' | 'UPCOMING';
+  notes?: string;
+  certificateUrl?: string;
 }
 
 export type NavigationTab =
