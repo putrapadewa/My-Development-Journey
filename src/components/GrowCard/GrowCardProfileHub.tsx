@@ -32,6 +32,7 @@ import {
 import { UserProfile, SkillItem, IndividualDevelopmentPlan } from '../../types';
 import { GrowCardPrintView, CardSections } from './GrowCardPrintView';
 import { generateGrowCardPPT } from './generateGrowCardPPT';
+import { CareerJourneyView } from './CareerJourneyView';
 import './GrowCardHub.css';
 
 export type ProfileSubMenu = 'MY_PROFILE' | 'MY_ASSESSMENT' | 'MY_CAREER' | 'MY_DEV_HISTORY';
@@ -589,89 +590,10 @@ export const GrowCardProfileHub: React.FC<GrowCardProfileHubProps> = ({
               )}
 
               {/* ================================================================= */}
-              {/* SUB-MENU 3: MY CAREER */}
+              {/* SUB-MENU 3: MY CAREER JOURNEY */}
               {/* ================================================================= */}
               {activeSubTab === 'MY_CAREER' && (
-                <div className="space-y-6 animate-in fade-in duration-200">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-                    <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/90 shadow-2xs space-y-5">
-                      <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-                        <Briefcase className="w-5 h-5 text-indigo-700" />
-                        <div>
-                          <h3 className="font-bold text-slate-900 text-sm">Jejak Langkah Karir (Career Progression Trail)</h3>
-                          <p className="text-xs text-slate-500 font-medium">Riwayat promosi, rotasi penugasan, dan kontribusi strategis</p>
-                        </div>
-                      </div>
-                      <div className="space-y-4 relative before:absolute before:inset-0 before:left-3.5 before:w-0.5 before:bg-slate-200">
-                        {user.careerHistory.map((ch, idx) => (
-                          <div key={idx} className="relative flex items-start gap-4 text-xs">
-                            <div className="w-7 h-7 rounded-full bg-indigo-900 text-white border-2 border-white shadow-xs flex items-center justify-center shrink-0 z-10 font-bold text-[11px]">
-                              {idx + 1}
-                            </div>
-                            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex-1 space-y-1.5">
-                              <div className="flex items-center justify-between font-bold text-slate-900 flex-wrap gap-1">
-                                <span className="text-sm">{ch.position}</span>
-                                <span className="text-slate-500 text-[11px] font-normal">{ch.period}</span>
-                              </div>
-                              <p className="text-slate-600 font-medium">{ch.businessUnit}</p>
-                              <div className="p-2.5 rounded-xl bg-indigo-50/70 border border-indigo-100 text-indigo-950 font-semibold text-[11px] leading-relaxed">
-                                &bull; <strong>Pencapaian Utama:</strong> {ch.keyAchievement}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="space-y-6">
-                      <div className="bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-3xl p-6 sm:p-7 border border-indigo-800 shadow-xl space-y-4">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-indigo-400/20 text-indigo-200 border border-indigo-400/30">
-                            Aspirasi Karir &amp; Target Peran Berikutnya
-                          </span>
-                          <Sparkles className="w-4 h-4 text-amber-300" />
-                        </div>
-                        <div>
-                          <h4 className="text-xl font-extrabold text-white">Head of Enterprise Architecture</h4>
-                          <p className="text-xs text-indigo-200 mt-1 font-medium leading-relaxed">
-                            Kesiapan Suksesi: <strong>Ready in 6 - 12 Months</strong>. Fokus pengembangan mencakup kepemimpinan strategis dan persuasi tingkat eksekutif.
-                          </p>
-                        </div>
-                        <div className="pt-2 flex items-center gap-3">
-                          <span className="text-xs text-indigo-200">Kesesuaian Kompetensi Suksesi:</span>
-                          <strong className="text-emerald-400 font-bold text-sm">84% Match</strong>
-                        </div>
-                      </div>
-
-                      <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/90 shadow-2xs space-y-4">
-                        <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-                          <Shield className="w-5 h-5 text-indigo-700" />
-                          <div>
-                            <h3 className="font-bold text-slate-900 text-sm">Hasil Kalibrasi Komite Talenta</h3>
-                            <p className="text-xs text-slate-500 font-medium">Catatan tinjauan performa dan kesiapan suksesi 9-Box</p>
-                          </div>
-                        </div>
-                        <div className="space-y-3">
-                          {user.talentCommitteeResults.map((tc, idx) => (
-                            <div key={idx} className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs space-y-2">
-                              <div className="flex items-center justify-between">
-                                <span className="font-bold text-indigo-950 text-sm">{tc.cycle}</span>
-                                <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold text-[10.5px]">
-                                  {tc.readinessRating}
-                                </span>
-                              </div>
-                              <p className="text-slate-700 font-medium"><strong>Hasil Kalibrasi:</strong> {tc.calibratedAssessment}</p>
-                              <div className="p-3 rounded-xl bg-white border border-slate-200 text-slate-600 italic font-medium leading-relaxed">
-                                "{tc.notes}"
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <CareerJourneyView user={user} />
               )}
 
               {/* ================================================================= */}

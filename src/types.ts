@@ -38,8 +38,22 @@ export interface CertificationRecord {
 export interface CareerRecord {
   position: string;
   businessUnit: string;
+  company?: string;
   period: string;
   keyAchievement: string;
+}
+
+export interface CareerPathEntry {
+  position: string;
+  businessUnit: string;
+  readinessScore: number; // 0–100
+  targetYear?: string;
+}
+
+export interface SuccessorEntry {
+  position: string;
+  businessUnit: string;
+  readinessScore: number; // 0–100
 }
 
 export interface TalentCommitteeRecord {
@@ -75,6 +89,12 @@ export interface UserProfile {
   careerHistory: CareerRecord[];
   talentCommitteeResults: TalentCommitteeRecord[];
   yearsOfExperience: number;
+  // Career journey fields
+  careerPaths?: CareerPathEntry[];
+  isSuccessor?: boolean;
+  successorFor?: SuccessorEntry[];
+  performanceRating?: 1 | 2 | 3 | 4;
+  potentialRating?: 1 | 2 | 3;
   // Extended profile fields
   personnelNumber?: string;
   globalId?: string;
