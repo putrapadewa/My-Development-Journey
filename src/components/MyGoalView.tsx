@@ -1102,7 +1102,7 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
             </div>
             <div>
               <h2 className="text-lg font-black text-slate-800">No Goals Configured Yet</h2>
-              <p className="text-sm text-slate-500 mt-1 max-w-md">
+              <p className="text-sm text-slate-500 mt-1 whitespace-nowrap">
                 Your FY 2026 Goals haven't been set up yet — choose how to get started.
               </p>
             </div>
@@ -1122,8 +1122,8 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
                 Add Goal Manually
               </button>
             </div>
-            <div className="mt-2 flex items-start gap-2 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 max-w-md text-left">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
+            <div className="mt-2 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-center">
+              <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
               <p className="text-[11px] text-amber-700">
                 <span className="font-bold">Generate by AI</span> will suggest Goals based on your position{' '}
                 <span className="font-bold">{position}</span> and business unit{' '}
