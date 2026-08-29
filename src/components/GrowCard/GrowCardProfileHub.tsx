@@ -24,8 +24,15 @@ import {
   BadgeCheck,
   X,
   Star,
+  Settings,
+  Download,
+  Presentation,
+  FileDown,
 } from 'lucide-react';
 import { UserProfile, SkillItem, IndividualDevelopmentPlan } from '../../types';
+import { GrowCardPrintView, CardSections } from './GrowCardPrintView';
+import { generateGrowCardPPT } from './generateGrowCardPPT';
+import './GrowCardHub.css';
 
 export type ProfileSubMenu = 'MY_PROFILE' | 'MY_ASSESSMENT' | 'MY_CAREER' | 'MY_DEV_HISTORY';
 
@@ -38,6 +45,28 @@ interface GrowCardProfileHubProps {
   onNavigateToTab?: (tab: string) => void;
 }
 
+const DEFAULT_SECTIONS: CardSections = {
+  orgStructure: true,
+  metrics: true,
+  strengths: true,
+  devAreas: true,
+  careerAspiration: true,
+  certifications: true,
+  devPlan: true,
+  talentBox: true,
+};
+
+const SECTION_LABELS: { key: keyof CardSections; label: string; desc: string }[] = [
+  { key: 'orgStructure', label: 'Struktur Organisasi', desc: 'Manager, HRBP, email, telepon, lokasi' },
+  { key: 'metrics', label: 'Metrik Kinerja & Pengembangan', desc: 'XP, jam belajar, skill fit, gap aktif' },
+  { key: 'strengths', label: 'Kekuatan (Strengths)', desc: 'Skill dengan proficiency tercapai' },
+  { key: 'devAreas', label: 'Area Pengembangan', desc: 'Skill dengan gap tertinggi' },
+  { key: 'careerAspiration', label: 'Aspirasi Karir', desc: 'Target peran berikutnya & readiness' },
+  { key: 'certifications', label: 'Sertifikasi & Lisensi', desc: 'Sertifikat profesional terverifikasi' },
+  { key: 'devPlan', label: 'Rencana Pengembangan (IDP)', desc: 'Tabel aktivitas 70:20:10 periode aktif' },
+  { key: 'talentBox', label: '9-Box Talent Rating', desc: 'Label High Potential pada header & footer' },
+];
+
 export const GrowCardProfileHub: React.FC<GrowCardProfileHubProps> = ({
   user,
   skills,
@@ -48,6 +77,11 @@ export const GrowCardProfileHub: React.FC<GrowCardProfileHubProps> = ({
 }) => {
   const [activeSubTab, setActiveSubTab] = useState<ProfileSubMenu>(initialSubTab);
   const [showProfileDetail, setShowProfileDetail] = useState(false);
+
+  // Card customisation state
+  const [showCardSettings, setShowCardSettings] = useState(false);
+  const [cardSections, setCardSections] = useState<CardSections>(DEFAULT_SECTIONS);
+  const [pptLoading, setPptLoading] = useState(false);
 
   useEffect(() => {
     if (initialSubTab) setActiveSubTab(initialSubTab);
@@ -60,11 +94,9 @@ export const GrowCardProfileHub: React.FC<GrowCardProfileHubProps> = ({
   const totalAchievedSkills = skills.filter((s) => s.gap <= 0).length;
   const criticalGapsCount = skills.filter((s) => s.gap > 0.8).length;
 
-  // Derive strengths & development areas from skills
   const strengthSkills = skills.filter((s) => s.gap <= 0).slice(0, 3);
   const gapSkills = skills.filter((s) => s.gap > 0).slice(0, 3);
 
-  // Use activeIdp for the grow card table; fallback to latest history entry
   const currentIdp = activeIdp || idpHistory[0];
   const currentActivities = currentIdp?.activities || [];
   const currentPeriod = currentIdp?.period || '2026 H1';
@@ -82,6 +114,25 @@ export const GrowCardProfileHub: React.FC<GrowCardProfileHubProps> = ({
     DRAFT: 'bg-slate-100 text-slate-600 border-slate-200',
     NOT_STARTED: 'bg-slate-100 text-slate-600 border-slate-200',
     WAITING_FOR_APPROVAL: 'bg-amber-100 text-amber-800 border-amber-200',
+  };
+
+  const toggleSection = (key: keyof CardSections) => {
+    setCardSections((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleDownloadPDF = () => {
+    window.print();
+  };
+
+  const handleDownloadPPT = async () => {
+    setPptLoading(true);
+    try {
+      await generateGrowCardPPT(user, skills, idpHistory, activeIdp, cardSections);
+    } catch (err) {
+      console.error('PPT generation failed:', err);
+    } finally {
+      setPptLoading(false);
+    }
   };
 
   return (
@@ -147,11 +198,11 @@ export const GrowCardProfileHub: React.FC<GrowCardProfileHubProps> = ({
         </div>
       </button>
 
-      {/* ── GROW CARD CONTENT ─────────────────────────────────────────────────── */}
+      {/* ── GROW CARD SECTION ─────────────────────────────────────────────────── */}
       <div className="space-y-4">
 
         {/* Section title bar */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-indigo-900 text-white">
               <FileText className="w-4 h-4" />
@@ -161,242 +212,151 @@ export const GrowCardProfileHub: React.FC<GrowCardProfileHubProps> = ({
               <p className="text-[11px] text-slate-500 font-medium">Growth &amp; Readiness for Opportunity &amp; Work</p>
             </div>
           </div>
-          <span className="text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-4 py-1.5 rounded-full">
-            Periode: {currentPeriod}
-          </span>
+
+          {/* Right side: period + action buttons */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-4 py-1.5 rounded-full">
+              Periode: {currentPeriod}
+            </span>
+
+            {/* Settings */}
+            <button
+              type="button"
+              onClick={() => setShowCardSettings(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-colors cursor-pointer"
+            >
+              <Settings className="w-3.5 h-3.5" />
+              Customize
+            </button>
+
+            {/* Download PDF */}
+            <button
+              type="button"
+              onClick={handleDownloadPDF}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition-colors cursor-pointer"
+            >
+              <FileDown className="w-3.5 h-3.5" />
+              Download PDF
+            </button>
+
+            {/* Download PPT */}
+            <button
+              type="button"
+              onClick={handleDownloadPPT}
+              disabled={pptLoading}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <Presentation className="w-3.5 h-3.5" />
+              {pptLoading ? 'Generating…' : 'Download PPT'}
+            </button>
+          </div>
         </div>
 
-        {/* ── Main Card ── */}
-        <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
-
-          {/* Card banner: identity */}
-          <div className="bg-gradient-to-r from-slate-900 to-indigo-900 p-6 text-white flex flex-col sm:flex-row items-start sm:items-center gap-5">
-            <img
-              src={user.avatar}
-              alt={user.name}
-              className="w-16 h-16 rounded-2xl object-cover ring-2 ring-white/30 shrink-0"
-            />
-            <div className="flex-1 min-w-0">
-              <h2 className="text-xl font-extrabold text-white">{user.name}</h2>
-              <p className="text-sm text-indigo-200 font-medium mt-0.5">{user.position}</p>
-              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-white/10 border border-white/20 text-white">
-                  {user.level}
-                </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300">
-                  {user.businessUnit}
-                </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-300">
-                  9-Box: High Potential
-                </span>
-              </div>
+        {/* ── CARD PREVIEW ── */}
+        <div className="rounded-3xl border border-slate-200 shadow-md overflow-hidden">
+          {/* Scale wrapper so the card fits on screen */}
+          <div className="overflow-x-auto bg-slate-100 p-4">
+            <div
+              style={{
+                transformOrigin: 'top left',
+                width: 'calc(297mm)',
+                minWidth: 800,
+              }}
+            >
+              <GrowCardPrintView
+                user={user}
+                skills={skills}
+                idpHistory={idpHistory}
+                activeIdp={activeIdp}
+                visibleSections={cardSections}
+              />
             </div>
-            <div className="text-right text-xs shrink-0">
-              <span className="text-indigo-300 block font-medium">ID Karyawan</span>
-              <span className="font-mono font-bold text-white text-sm">{user.employeeId}</span>
-              <span className="text-indigo-300 block font-medium mt-1.5">Bergabung</span>
-              <span className="font-bold text-white">{user.joinDate}</span>
-            </div>
-          </div>
-
-          {/* Card body */}
-          <div className="p-6 space-y-5">
-
-            {/* Row 1: Org info + Metrics */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-              {/* Org structure */}
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
-                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Struktur Organisasi</h4>
-                <div className="space-y-2.5 text-xs">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0">
-                      <User className="w-3.5 h-3.5 text-indigo-700" />
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-slate-400 font-bold block">Direct Line Manager</span>
-                      <span className="font-bold text-slate-900">{user.managerName}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-lg bg-purple-100 flex items-center justify-center shrink-0">
-                      <Shield className="w-3.5 h-3.5 text-purple-700" />
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-slate-400 font-bold block">HRBP Partner</span>
-                      <span className="font-bold text-slate-900">{user.hrbpName}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
-                      <Building className="w-3.5 h-3.5 text-slate-600" />
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-slate-400 font-bold block">Division &amp; Department</span>
-                      <span className="font-bold text-slate-900">{user.division} &bull; {user.department}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
-                      <MapPin className="w-3.5 h-3.5 text-slate-600" />
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-slate-400 font-bold block">Lokasi Penempatan</span>
-                      <span className="font-bold text-slate-900">{user.location}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Performance metrics */}
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
-                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kinerja &amp; Pengembangan</h4>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="p-2.5 rounded-xl bg-white border border-slate-200/80 text-center">
-                    <span className="text-[10px] text-slate-400 font-bold block">Total XP</span>
-                    <span className="text-lg font-black text-amber-600">{totalXP}</span>
-                  </div>
-                  <div className="p-2.5 rounded-xl bg-white border border-slate-200/80 text-center">
-                    <span className="text-[10px] text-slate-400 font-bold block">Jam Belajar</span>
-                    <span className="text-lg font-black text-indigo-900">{totalCompletedHours}h</span>
-                  </div>
-                  <div className="p-2.5 rounded-xl bg-white border border-slate-200/80 text-center">
-                    <span className="text-[10px] text-slate-400 font-bold block">Skill Fit</span>
-                    <span className="text-lg font-black text-emerald-700">{totalAchievedSkills}/{skills.length}</span>
-                  </div>
-                  <div className="p-2.5 rounded-xl bg-white border border-slate-200/80 text-center">
-                    <span className="text-[10px] text-slate-400 font-bold block">Gap Aktif</span>
-                    <span className="text-lg font-black text-amber-600">{criticalGapsCount}</span>
-                  </div>
-                </div>
-                <div className="p-2.5 rounded-xl bg-indigo-50 border border-indigo-100 text-center">
-                  <span className="text-[10px] text-indigo-700 font-bold block">Talent Readiness</span>
-                  <span className="text-sm font-extrabold text-indigo-900">Ready in 6–12 Months</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Row 2: Strengths & Development Areas */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-              {/* Strengths */}
-              <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-3">
-                <div className="flex items-center gap-2">
-                  <Star className="w-4 h-4 text-emerald-700" />
-                  <h4 className="text-xs font-bold text-emerald-900">Kekuatan (Strengths)</h4>
-                </div>
-                <div className="space-y-2">
-                  {strengthSkills.length > 0 ? (
-                    strengthSkills.map((s) => (
-                      <div key={s.id} className="flex items-center justify-between p-2.5 rounded-xl bg-white border border-emerald-200 text-xs">
-                        <span className="font-bold text-slate-900">{s.name}</span>
-                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
-                          Level {s.currentProficiency}
-                        </span>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-xs text-emerald-700 font-medium">
-                      Terus kembangkan kompetensi untuk mencapai proficiency target.
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Development Areas */}
-              <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 space-y-3">
-                <div className="flex items-center gap-2">
-                  <Target className="w-4 h-4 text-amber-700" />
-                  <h4 className="text-xs font-bold text-amber-900">Area Pengembangan</h4>
-                </div>
-                <div className="space-y-2">
-                  {gapSkills.length > 0 ? (
-                    gapSkills.map((s) => (
-                      <div key={s.id} className="flex items-center justify-between p-2.5 rounded-xl bg-white border border-amber-200 text-xs">
-                        <span className="font-bold text-slate-900">{s.name}</span>
-                        <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
-                          Gap -{s.gap}
-                        </span>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-xs text-amber-700 font-medium">
-                      Semua kompetensi telah memenuhi standar jabatan saat ini.
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Row 3: Development Plan Table */}
-            {currentActivities.length > 0 ? (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                    <BookOpen className="w-4 h-4 text-indigo-700" />
-                    Rencana Pengembangan — {currentPeriod}
-                  </h4>
-                  <span className="text-[10px] font-bold text-slate-400">{currentActivities.length} aktivitas</span>
-                </div>
-                <div className="overflow-x-auto rounded-2xl border border-slate-200">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-slate-50 text-slate-600 border-b border-slate-200">
-                      <tr>
-                        <th className="py-3 px-4 font-bold">Tujuan / Goals</th>
-                        <th className="py-3 px-4 font-bold">Tipe</th>
-                        <th className="py-3 px-4 font-bold">Program</th>
-                        <th className="py-3 px-4 font-bold">Provider</th>
-                        <th className="py-3 px-4 font-bold">Timeline</th>
-                        <th className="py-3 px-4 font-bold">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {currentActivities.map((act) => {
-                        const typeInfo = typeMap[act.frameworkType] || {
-                          label: act.frameworkType,
-                          color: 'bg-slate-100 text-slate-800 border-slate-200',
-                        };
-                        const statusColor = statusColors[act.status] || 'bg-slate-100 text-slate-600 border-slate-200';
-                        return (
-                          <tr key={act.id} className="hover:bg-slate-50/70 transition-colors">
-                            <td className="py-3 px-4">
-                              <span className="font-semibold text-slate-900 line-clamp-2">{act.goal}</span>
-                            </td>
-                            <td className="py-3 px-4">
-                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${typeInfo.color}`}>
-                                {typeInfo.label}
-                              </span>
-                            </td>
-                            <td className="py-3 px-4 font-medium text-slate-800">{act.programName}</td>
-                            <td className="py-3 px-4 text-slate-500 font-medium">{act.provider}</td>
-                            <td className="py-3 px-4 text-slate-500 font-medium whitespace-nowrap">
-                              {act.timelineStart && act.timelineEnd
-                                ? `${act.timelineStart.slice(0, 7)} – ${act.timelineEnd.slice(0, 7)}`
-                                : '—'}
-                            </td>
-                            <td className="py-3 px-4">
-                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${statusColor}`}>
-                                {act.status.replace(/_/g, ' ')}
-                              </span>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            ) : (
-              <div className="p-6 rounded-2xl border border-dashed border-slate-300 text-center">
-                <BookOpen className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                <p className="text-sm text-slate-500 font-medium">Belum ada rencana pengembangan aktif.</p>
-                <p className="text-xs text-slate-400 mt-1">Buat Journey di tab My Development untuk memulai.</p>
-              </div>
-            )}
-
           </div>
         </div>
       </div>
+
+      {/* ── SETTINGS PANEL ────────────────────────────────────────────────────── */}
+      {showCardSettings && (
+        <div className="fixed inset-0 z-[200] flex">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+            onClick={() => setShowCardSettings(false)}
+          />
+
+          {/* Slide-in panel from right */}
+          <div className="relative ml-auto w-full max-w-xs bg-white h-full shadow-2xl flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-indigo-900 text-white rounded-tl-2xl">
+              <div className="flex items-center gap-2.5">
+                <Settings className="w-4 h-4 text-indigo-300" />
+                <div>
+                  <h3 className="font-extrabold text-sm">Customize Card</h3>
+                  <p className="text-[10px] text-indigo-300 font-medium">Pilih section yang ditampilkan</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCardSettings(false)}
+                className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Toggle list */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+              {SECTION_LABELS.map(({ key, label, desc }) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => toggleSection(key)}
+                  className={`w-full flex items-start gap-3 p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
+                    cardSections[key]
+                      ? 'bg-indigo-50 border-indigo-200 ring-1 ring-indigo-300/40'
+                      : 'bg-slate-50 border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  {/* Checkbox visual */}
+                  <div className={`w-4 h-4 mt-0.5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors ${
+                    cardSections[key] ? 'bg-indigo-900 border-indigo-900' : 'border-slate-300 bg-white'
+                  }`}>
+                    {cardSections[key] && (
+                      <svg className="w-2.5 h-2.5 text-white" viewBox="0 0 10 10" fill="none">
+                        <path d="M1.5 5l2.5 2.5L8.5 2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    )}
+                  </div>
+                  <div>
+                    <span className={`text-xs font-bold block ${cardSections[key] ? 'text-indigo-900' : 'text-slate-700'}`}>
+                      {label}
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-medium">{desc}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {/* Footer actions */}
+            <div className="px-4 py-4 border-t border-slate-200 space-y-2">
+              <button
+                type="button"
+                onClick={() => setCardSections(DEFAULT_SECTIONS)}
+                className="w-full py-2 rounded-xl text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-colors cursor-pointer"
+              >
+                Reset ke Default
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowCardSettings(false)}
+                className="w-full py-2 rounded-xl text-xs font-bold text-white bg-indigo-900 hover:bg-indigo-800 transition-colors cursor-pointer"
+              >
+                Terapkan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── PROFILE DETAIL DRAWER ─────────────────────────────────────────────── */}
       {showProfileDetail && (
