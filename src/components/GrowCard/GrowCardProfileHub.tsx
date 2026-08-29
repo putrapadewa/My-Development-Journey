@@ -46,25 +46,27 @@ interface GrowCardProfileHubProps {
 }
 
 const DEFAULT_SECTIONS: CardSections = {
-  orgStructure: true,
-  metrics: true,
   strengths: true,
   devAreas: true,
-  careerAspiration: true,
-  certifications: true,
   devPlan: true,
-  talentBox: true,
+  education: true,
+  certifications: true,
+  orgStructure: false,
+  careerAspiration: false,
+  metrics: false,
+  talentBox: false,
 };
 
 const SECTION_LABELS: { key: keyof CardSections; label: string; desc: string }[] = [
-  { key: 'orgStructure', label: 'Struktur Organisasi', desc: 'Manager, HRBP, email, telepon, lokasi' },
-  { key: 'metrics', label: 'Metrik Kinerja & Pengembangan', desc: 'XP, jam belajar, skill fit, gap aktif' },
-  { key: 'strengths', label: 'Kekuatan (Strengths)', desc: 'Skill dengan proficiency tercapai' },
-  { key: 'devAreas', label: 'Area Pengembangan', desc: 'Skill dengan gap tertinggi' },
-  { key: 'careerAspiration', label: 'Aspirasi Karir', desc: 'Target peran berikutnya & readiness' },
-  { key: 'certifications', label: 'Sertifikasi & Lisensi', desc: 'Sertifikat profesional terverifikasi' },
-  { key: 'devPlan', label: 'Rencana Pengembangan (IDP)', desc: 'Tabel aktivitas 70:20:10 periode aktif' },
-  { key: 'talentBox', label: '9-Box Talent Rating', desc: 'Label High Potential pada header & footer' },
+  { key: 'strengths',       label: 'Kekuatan (Strengths)',          desc: 'Skill dengan proficiency tercapai' },
+  { key: 'devAreas',        label: 'Area Pengembangan',             desc: 'Skill dengan gap tertinggi' },
+  { key: 'devPlan',         label: 'Strategic Project (70:20:10)',  desc: 'Tabel rencana pengembangan periode aktif' },
+  { key: 'education',       label: 'Riwayat Pendidikan',           desc: 'Degree, major, institusi, tahun lulus' },
+  { key: 'certifications',  label: 'Sertifikasi & Pelatihan',      desc: 'Sertifikat profesional terverifikasi' },
+  { key: 'orgStructure',    label: 'Struktur Organisasi',          desc: 'Manager, HRBP, email, telepon, lokasi' },
+  { key: 'careerAspiration',label: 'Aspirasi Karir',               desc: 'Target peran berikutnya & readiness' },
+  { key: 'metrics',         label: 'Metrik Kinerja',               desc: 'XP, jam belajar, skill fit, gap aktif' },
+  { key: 'talentBox',       label: '9-Box Talent Rating',          desc: 'Label High Potential pada header & footer' },
 ];
 
 export const GrowCardProfileHub: React.FC<GrowCardProfileHubProps> = ({
@@ -194,24 +196,13 @@ export const GrowCardProfileHub: React.FC<GrowCardProfileHubProps> = ({
 
         {/* ── CARD PREVIEW ── */}
         <div className="rounded-3xl border border-slate-200 shadow-md overflow-hidden">
-          {/* Scale wrapper so the card fits on screen */}
-          <div className="overflow-x-auto bg-slate-100 p-4">
-            <div
-              style={{
-                transformOrigin: 'top left',
-                width: 'calc(297mm)',
-                minWidth: 800,
-              }}
-            >
-              <GrowCardPrintView
-                user={user}
-                skills={skills}
-                idpHistory={idpHistory}
-                activeIdp={activeIdp}
-                visibleSections={cardSections}
-              />
-            </div>
-          </div>
+          <GrowCardPrintView
+            user={user}
+            skills={skills}
+            idpHistory={idpHistory}
+            activeIdp={activeIdp}
+            visibleSections={cardSections}
+          />
         </div>
       </div>
 
