@@ -34,6 +34,7 @@ import { triggerMilestoneCelebration } from './utils/confetti';
 import { ProfileSubMenu } from './components/GrowCard/GrowCardProfileHub';
 import { MyProfileView } from './components/MyProfileView';
 import { MyGoalView } from './components/MyGoalView';
+import { CareerJourneyView } from './components/GrowCard/CareerJourneyView';
 
 export function App() {
   const [currentUser, setCurrentUser] = useState<UserProfile>(INITIAL_USER_PROFILE);
@@ -358,13 +359,7 @@ export function App() {
 
         {/* MY CAREER JOURNEY */}
         {activeTab === 'career' && (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center mb-4">
-              <BarChart3 className="w-8 h-8 text-emerald-500" />
-            </div>
-            <h2 className="text-xl font-black text-slate-800 mb-2">My Career Journey</h2>
-            <p className="text-sm text-slate-500 max-w-md">Jalur karier, aspirasi, dan mobilitas internal — halaman ini sedang dalam pengembangan.</p>
-          </div>
+          <CareerJourneyView user={currentUser} />
         )}
 
         {/* MY GOAL */}
