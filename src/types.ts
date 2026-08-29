@@ -158,6 +158,60 @@ export interface UserProfile {
   managerPersonnelNumber?: string;
   hrbpPersonnelNumber?: string;
   hrbpEmail?: string;
+  // Psychometric assessments
+  hoganAssessment?: HoganAssessment;
+  otherAssessments?: OtherAssessmentResult[];
+}
+
+// ── Assessment Types ─────────────────────────────────────────────────────────
+
+export interface HoganScaleScore {
+  scale: string;
+  abbreviation?: string;
+  score: number;       // 0–99 percentile
+  level: 'low' | 'moderate' | 'high';
+  interpretation: string;
+}
+
+export interface HoganBusinessReasoning {
+  qualitative: number;         // percentile
+  quantitative: number;        // percentile
+  cognitiveStyle: string;      // e.g. "Quantitative Reasoner"
+  overallPercentile: number;
+  description: string;
+}
+
+export interface HoganHighPotential {
+  leadershipFoundations: number;    // 0–100
+  leadershipEmergence: number;      // 0–100
+  leadershipEffectiveness: number;  // 0–100
+  overallScore: number;             // 0–100
+  category: string;                 // e.g. "High Potential"
+  narrative: string;
+}
+
+export interface HoganAssessment {
+  assessmentDate: string;
+  assessedBy?: string;
+  reportVersion?: string;
+  hpi: HoganScaleScore[];   // Personality Inventory
+  hds: HoganScaleScore[];   // Development Survey (derailers)
+  mvpi: HoganScaleScore[];  // Motives, Values, Preferences
+  businessReasoning?: HoganBusinessReasoning;
+  highPotential?: HoganHighPotential;
+  executiveSummary?: string;
+}
+
+export interface OtherAssessmentResult {
+  id: string;
+  name: string;           // e.g. "DISC Assessment", "MBTI", "360 Feedback"
+  provider: string;
+  assessmentDate: string;
+  result: string;         // primary result label
+  description: string;
+  dimensions?: { label: string; score: number; maxScore: number; color?: string }[];
+  narrative?: string;
+  reportUrl?: string;
 }
 
 export interface SkillItem {

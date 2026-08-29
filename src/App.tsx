@@ -35,6 +35,7 @@ import { ProfileSubMenu } from './components/GrowCard/GrowCardProfileHub';
 import { MyProfileView } from './components/MyProfileView';
 import { MyGoalView } from './components/MyGoalView';
 import { CareerJourneyView } from './components/GrowCard/CareerJourneyView';
+import { AssessmentView } from './components/Assessment/AssessmentView';
 
 export function App() {
   const [currentUser, setCurrentUser] = useState<UserProfile>(INITIAL_USER_PROFILE);
@@ -337,13 +338,7 @@ export function App() {
 
         {/* MY ASSESSMENT */}
         {activeTab === 'assessment' && (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center mb-4">
-              <ClipboardList className="w-8 h-8 text-amber-500" />
-            </div>
-            <h2 className="text-xl font-black text-slate-800 mb-2">My Assessment</h2>
-            <p className="text-sm text-slate-500 max-w-md">Skill & competency assessment — halaman ini sedang dalam pengembangan.</p>
-          </div>
+          <AssessmentView user={currentUser} />
         )}
 
         {/* MY DEV HISTORY */}
