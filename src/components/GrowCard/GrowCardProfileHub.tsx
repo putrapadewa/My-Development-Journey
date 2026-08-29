@@ -138,66 +138,6 @@ export const GrowCardProfileHub: React.FC<GrowCardProfileHubProps> = ({
   return (
     <div className="space-y-6 pb-12">
 
-      {/* ── CLICKABLE PROFILE HEADER ──────────────────────────────────────────── */}
-      <button
-        type="button"
-        onClick={() => setShowProfileDetail(true)}
-        className="w-full text-left rounded-3xl bg-indigo-900 text-white p-6 sm:p-8 shadow-xl border border-indigo-800 relative overflow-hidden cursor-pointer hover:bg-indigo-800 transition-colors group"
-      >
-        <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
-          <Award className="w-64 h-64 text-indigo-300" />
-        </div>
-
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="flex items-start sm:items-center gap-5">
-            <img
-              src={user.avatar}
-              alt={user.name}
-              className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl object-cover ring-4 ring-white/20 shadow-lg"
-            />
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">{user.name}</h1>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-indigo-400/20 text-indigo-200 border border-indigo-400/30">
-                  {user.level}
-                </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  9-Box: High Potential
-                </span>
-              </div>
-              <p className="text-sm text-indigo-200 mt-1 font-medium">
-                {user.position} &bull; <strong className="text-white">{user.businessUnit}</strong>
-              </p>
-              <div className="flex items-center gap-4 text-xs text-indigo-200/80 mt-2 flex-wrap font-medium">
-                <span>Employee ID: <strong className="text-white">{user.employeeId}</strong></span>
-                <span>Manager: <strong className="text-white">{user.managerName}</strong></span>
-                <span>HRBP: <strong className="text-white">{user.hrbpName}</strong></span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/15 shadow-inner">
-              <div className="text-center px-3 border-r border-white/15">
-                <span className="text-[10px] text-indigo-200 uppercase tracking-widest block font-bold">Total XP</span>
-                <span className="text-xl font-black text-amber-300 flex items-center justify-center gap-1 mt-0.5">
-                  <Zap className="w-4 h-4 text-amber-400 fill-amber-400" />
-                  {totalXP}
-                </span>
-              </div>
-              <div className="text-center px-3">
-                <span className="text-[10px] text-indigo-200 uppercase tracking-widest block font-bold">Logged Hours</span>
-                <span className="text-xl font-black text-white mt-0.5">{totalCompletedHours}h</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-indigo-200 group-hover:text-white transition-colors font-semibold">
-              <span>Lihat Profil Lengkap</span>
-              <ChevronRight className="w-4 h-4" />
-            </div>
-          </div>
-        </div>
-      </button>
-
       {/* ── GROW CARD SECTION ─────────────────────────────────────────────────── */}
       <div className="space-y-4">
 
