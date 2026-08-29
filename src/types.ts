@@ -109,6 +109,44 @@ export interface CareerChatInsight {
   additionalNotes?: string;
 }
 
+// ── Leadership DNA Types ──────────────────────────────────────────────────────
+
+export type DNASkillRating = 'Strong' | 'Partial' | 'Developing' | 'Not Assessed';
+
+export interface CoreCompetencyScore {
+  id: number;
+  name: string;
+  currentLevel: number;  // 1–5
+  targetLevel: number;   // 1–5
+  description?: string;
+}
+
+export interface DNADimensionScore {
+  dimension: 'VL' | 'FS' | 'MA' | 'IT' | 'EL';
+  label: string;
+  rating: DNASkillRating;
+  notes?: string;
+}
+
+export interface DNAAssessmentSource {
+  sourceId: string;
+  sourceName: string;
+  sourceDescription: string;
+  iconType: 'AI' | 'H' | 'SV';
+  status: 'COMPLETE' | 'PENDING' | 'IN_PROGRESS';
+  assessmentDate?: string;
+  dimensions: DNADimensionScore[];
+  narrative?: string;
+}
+
+export interface LeadershipDNAProfile {
+  coreCompetencies: CoreCompetencyScore[];
+  sources: DNAAssessmentSource[];
+  integratedRead?: string;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 export interface UserProfile {
   id: string;
   employeeId: string;
@@ -161,6 +199,8 @@ export interface UserProfile {
   // Psychometric assessments
   hoganAssessment?: HoganAssessment;
   otherAssessments?: OtherAssessmentResult[];
+  // Leadership DNA
+  leadershipDNA?: LeadershipDNAProfile;
 }
 
 // ── Assessment Types ─────────────────────────────────────────────────────────

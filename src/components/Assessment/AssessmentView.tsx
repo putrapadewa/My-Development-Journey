@@ -1,24 +1,26 @@
 import { useState } from 'react';
 import {
-  Brain, BarChart3, Target, Star, AlertTriangle, Heart,
+  Brain, BarChart3, Star, AlertTriangle, Heart,
   ChevronDown, ChevronUp, Award, Users, TrendingUp,
-  Lightbulb, Shield, Zap, BookOpen, ClipboardList,
+  Lightbulb, Shield, BookOpen, ClipboardList,
+  Dna, CheckCircle2, Clock, Layers, ChevronRight,
 } from 'lucide-react';
-import type { UserProfile, HoganScaleScore } from '../../types';
+import type { UserProfile, HoganScaleScore, DNADimensionScore, DNASkillRating } from '../../types';
 
 interface AssessmentViewProps {
   user: UserProfile;
 }
 
-type ActiveTab = 'overview' | 'hpi' | 'hds' | 'mvpi' | 'reasoning' | 'other';
+type ActiveTab = 'overview' | 'hpi' | 'hds' | 'mvpi' | 'reasoning' | 'leadership-dna' | 'other';
 
 const TAB_CONFIG: { id: ActiveTab; label: string; icon: React.ElementType; color: string }[] = [
-  { id: 'overview', label: 'Overview', icon: Brain, color: 'indigo' },
-  { id: 'hpi', label: 'HPI – Personality', icon: Star, color: 'violet' },
-  { id: 'hds', label: 'HDS – Derailers', icon: AlertTriangle, color: 'amber' },
-  { id: 'mvpi', label: 'MVPI – Values', icon: Heart, color: 'emerald' },
-  { id: 'reasoning', label: 'Business Reasoning', icon: BarChart3, color: 'sky' },
-  { id: 'other', label: 'Other Assessments', icon: ClipboardList, color: 'rose' },
+  { id: 'overview',        label: 'Overview',            icon: Brain,        color: 'indigo' },
+  { id: 'hpi',             label: 'HPI – Personality',   icon: Star,         color: 'violet' },
+  { id: 'hds',             label: 'HDS – Derailers',     icon: AlertTriangle,color: 'amber'  },
+  { id: 'mvpi',            label: 'MVPI – Values',       icon: Heart,        color: 'emerald'},
+  { id: 'reasoning',       label: 'Business Reasoning',  icon: BarChart3,    color: 'sky'    },
+  { id: 'leadership-dna',  label: 'Leadership DNA',      icon: Dna,          color: 'teal'   },
+  { id: 'other',           label: 'Other Assessments',   icon: ClipboardList,color: 'rose'   },
 ];
 
 const LEVEL_COLORS: Record<string, { bar: string; badge: string; text: string }> = {
@@ -78,6 +80,63 @@ function ScaleBar({ scale, isDerailer = false, expanded, onToggle }: {
         </div>
       )}
     </div>
+  );
+}
+
+// ── Pentagon radar chart (SVG) ────────────────────────────────────────────────
+const DNA_ORDER: DNADimensionScore['dimension'][] = ['FS', 'VL', 'EL', 'MA', 'IT'];
+const DNA_LABELS: Record<string, string> = {
+  VL: 'Visionary\nLeadership',
+  FS: 'Financial\nStewardship',
+  MA: 'Market\nAdaptability',
+  IT: 'Innovation &\nTech',
+  EL: 'Entrepreneurial\nLeadership',
+};
+const RATING_VAL: Record<DNASkillRating, number> = {
+  'Strong': 1, 'Partial': 0.6, 'Developing': 0.3, 'Not Assessed': 0,
+};
+
+function PentagonChart({ dimensions, size = 140 }: { dimensions: DNADimensionScore[]; size?: number }) {
+  const cx = size / 2;
+  const cy = size / 2;
+  const r = size * 0.36;
+  const n = 5;
+  const angles = Array.from({ length: n }, (_, i) => -Math.PI / 2 + (i * 2 * Math.PI) / n);
+  const ordered = DNA_ORDER.map(dim => dimensions.find(d => d.dimension === dim) ?? { dimension: dim, label: dim, rating: 'Not Assessed' as DNASkillRating });
+  const hasData = ordered.some(d => d.rating !== 'Not Assessed');
+  const rings = [0.33, 0.67, 1];
+  const pt = (angle: number, scale: number) => ({
+    x: cx + r * scale * Math.cos(angle),
+    y: cy + r * scale * Math.sin(angle),
+  });
+  const toPath = (pts: { x: number; y: number }[]) =>
+    pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(' ') + 'Z';
+
+  const ringPaths = rings.map(s => toPath(angles.map(a => pt(a, s))));
+  const dataPath = toPath(ordered.map((d, i) => pt(angles[i], RATING_VAL[d.rating as DNASkillRating])));
+
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ overflow: 'visible' }}>
+      {ringPaths.map((d, i) => <path key={i} d={d} fill="none" stroke="#e2e8f0" strokeWidth="0.8" />)}
+      {angles.map((a, i) => { const end = pt(a, 1); return <line key={i} x1={cx} y1={cy} x2={end.x} y2={end.y} stroke="#cbd5e1" strokeWidth="0.8" />; })}
+      {hasData && <path d={dataPath} fill="rgba(20,184,166,0.18)" stroke="rgb(13,148,136)" strokeWidth="1.8" strokeLinejoin="round" />}
+      {ordered.map((dim, i) => {
+        const val = RATING_VAL[dim.rating as DNASkillRating];
+        const dotPt = pt(angles[i], val);
+        const lblPt = pt(angles[i], 1.38);
+        const lines = (DNA_LABELS[dim.dimension] ?? dim.dimension).split('\n');
+        const color = dim.rating === 'Strong' ? '#0d9488' : dim.rating === 'Partial' ? '#d97706' : dim.rating === 'Developing' ? '#7c3aed' : '#94a3b8';
+        return (
+          <g key={dim.dimension}>
+            {hasData && val > 0 && <circle cx={dotPt.x} cy={dotPt.y} r="3" fill={color} stroke="white" strokeWidth="1" />}
+            {lines.map((line, li) => (
+              <text key={li} x={lblPt.x} y={lblPt.y + (li - (lines.length - 1) / 2) * 9} textAnchor="middle" dominantBaseline="middle" fontSize="7" fontWeight="600" fill="#475569">{line}</text>
+            ))}
+          </g>
+        );
+      })}
+      {!hasData && <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle" fontSize="8" fill="#94a3b8">Belum diisi</text>}
+    </svg>
   );
 }
 
@@ -601,6 +660,218 @@ export function AssessmentView({ user }: AssessmentViewProps) {
                 </div>
               );
             })
+          )}
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════════════════════
+          TAB: LEADERSHIP DNA
+      ════════════════════════════════════════════════════════ */}
+      {activeTab === 'leadership-dna' && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+
+          {/* Framework header */}
+          <div className="rounded-3xl bg-gradient-to-br from-teal-900 via-slate-900 to-indigo-950 p-5 text-white shadow-xl">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0">
+                <Dna className="w-5 h-5 text-teal-300" />
+              </div>
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-widest text-teal-300">TechConnect GO WIN</p>
+                <h2 className="text-base font-black">Leadership Competency Framework</h2>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="bg-white/10 border border-white/15 rounded-2xl p-3">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Layers className="w-3.5 h-3.5 text-teal-300" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-teal-300">Layer 1 — License to Operate</span>
+                </div>
+                <p className="text-[11.5px] text-slate-300 leading-relaxed">Core Competency Model · 8 universal behaviours required for all roles across levels</p>
+              </div>
+              <div className="bg-white/10 border border-white/15 rounded-2xl p-3">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Dna className="w-3.5 h-3.5 text-indigo-300" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-indigo-300">Layer 2 — License to Rise</span>
+                </div>
+                <p className="text-[11.5px] text-slate-300 leading-relaxed">Leadership DNA Profile · 5 essential skills for senior and executive leadership roles</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Layer 1: 8 Core Competencies */}
+          {user.leadershipDNA?.coreCompetencies && user.leadershipDNA.coreCompetencies.length > 0 && (
+            <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
+              <div className="px-5 py-3.5 bg-slate-50 border-b border-slate-100 flex items-center gap-2">
+                <Layers className="w-4 h-4 text-slate-500" />
+                <span className="text-[11px] font-black uppercase tracking-widest text-slate-600">Layer 1 — 8 Core Competencies</span>
+              </div>
+              <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {user.leadershipDNA.coreCompetencies.map(comp => {
+                  const achieved = comp.currentLevel >= comp.targetLevel;
+                  const pct = Math.round((comp.currentLevel / 5) * 100);
+                  return (
+                    <div key={comp.id} className="p-3.5 rounded-2xl border border-slate-100 bg-slate-50/60">
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div className="flex-1 min-w-0">
+                          <span className="text-[12.5px] font-bold text-slate-800 block">{comp.name}</span>
+                          {comp.description && <span className="text-[10.5px] text-slate-500 leading-snug">{comp.description}</span>}
+                        </div>
+                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border shrink-0 ${
+                          achieved
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            : 'bg-amber-50 text-amber-700 border-amber-200'
+                        }`}>{comp.currentLevel}/{comp.targetLevel}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                          <div className={`h-full rounded-full transition-all duration-500 ${achieved ? 'bg-emerald-500' : 'bg-amber-400'}`} style={{ width: `${pct}%` }} />
+                        </div>
+                        <span className="text-[10px] text-slate-400 w-8 text-right font-medium">L{comp.currentLevel}/5</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Layer 2: Leadership DNA Gap Analysis */}
+          {user.leadershipDNA?.sources && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Dna className="w-4 h-4 text-teal-600" />
+                <span className="text-[11px] font-black uppercase tracking-widest text-teal-700">Layer 2 — Leadership DNA Gap Analysis (5 Dimensions)</span>
+              </div>
+
+              {/* 5 DNA dimensions legend */}
+              <div className="grid grid-cols-5 gap-2">
+                {DNA_ORDER.map(dim => {
+                  const labelMap: Record<string, { full: string; color: string; bg: string }> = {
+                    VL: { full: 'Visionary Leadership',         color: 'text-indigo-700', bg: 'bg-indigo-50 border-indigo-200' },
+                    FS: { full: 'Financial Stewardship',        color: 'text-teal-700',   bg: 'bg-teal-50 border-teal-200'   },
+                    MA: { full: 'Market Adaptability',          color: 'text-amber-700',  bg: 'bg-amber-50 border-amber-200' },
+                    IT: { full: 'Innovation & Tech',            color: 'text-violet-700', bg: 'bg-violet-50 border-violet-200'},
+                    EL: { full: 'Entrepreneurial Leadership',   color: 'text-rose-700',   bg: 'bg-rose-50 border-rose-200'   },
+                  };
+                  const d = labelMap[dim];
+                  return (
+                    <div key={dim} className={`p-2.5 rounded-xl border text-center ${d.bg}`}>
+                      <span className={`text-[12px] font-black block ${d.color}`}>{dim}</span>
+                      <span className="text-[9px] text-slate-500 leading-tight">{d.full}</span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Source cards */}
+              {user.leadershipDNA.sources.map(source => {
+                const isComplete = source.status === 'COMPLETE';
+                const ratingColors: Record<string, string> = {
+                  'Strong':       'bg-emerald-100 text-emerald-800 border-emerald-200',
+                  'Partial':      'bg-amber-100 text-amber-800 border-amber-200',
+                  'Developing':   'bg-violet-100 text-violet-800 border-violet-200',
+                  'Not Assessed': 'bg-slate-100 text-slate-500 border-slate-200',
+                };
+                const iconMap: Record<string, string> = { AI: '🤖', H: 'H', SV: 'SV' };
+                return (
+                  <div key={source.sourceId} className="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
+                    {/* Source header */}
+                    <div className="px-5 py-3.5 flex flex-col sm:flex-row sm:items-center gap-3 border-b border-slate-100 bg-slate-50/60">
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-[11px] font-black border shrink-0 ${
+                        isComplete ? 'bg-teal-100 text-teal-700 border-teal-200' : 'bg-slate-100 text-slate-500 border-slate-200'
+                      }`}>{iconMap[source.iconType]}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-[13px] font-black text-slate-800">{source.sourceName}</span>
+                          {isComplete ? (
+                            <span className="flex items-center gap-1 text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">
+                              <CheckCircle2 className="w-3 h-3" /> COMPLETE
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-1 text-[10px] font-black bg-slate-100 text-slate-500 border border-slate-200 px-2 py-0.5 rounded-full">
+                              <Clock className="w-3 h-3" /> PENDING
+                            </span>
+                          )}
+                          {source.assessmentDate && (
+                            <span className="text-[10px] text-slate-400">{source.assessmentDate}</span>
+                          )}
+                        </div>
+                        <p className="text-[10.5px] text-slate-500 mt-0.5">{source.sourceDescription}</p>
+                      </div>
+                    </div>
+
+                    <div className="p-5">
+                      <div className="flex flex-col sm:flex-row gap-5">
+                        {/* Pentagon */}
+                        <div className="shrink-0 flex flex-col items-center gap-2">
+                          <PentagonChart dimensions={source.dimensions} size={160} />
+                          <div className="flex flex-wrap gap-1.5 justify-center">
+                            {[
+                              { label: 'Strong', color: 'bg-teal-500' },
+                              { label: 'Partial', color: 'bg-amber-400' },
+                              { label: 'Developing', color: 'bg-violet-400' },
+                            ].map(l => (
+                              <span key={l.label} className="flex items-center gap-1 text-[9px] text-slate-500">
+                                <span className={`w-2 h-2 rounded-full ${l.color}`} />{l.label}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Dimension rows */}
+                        <div className="flex-1 space-y-1.5">
+                          {source.dimensions.map(dim => {
+                            const key = `dna-${source.sourceId}-${dim.dimension}`;
+                            const isExpanded = !!expandedScales[key];
+                            return (
+                              <div key={dim.dimension} className="rounded-xl border border-slate-100 overflow-hidden">
+                                <button
+                                  onClick={() => toggleScale(key)}
+                                  className="w-full px-3.5 py-2.5 flex items-center gap-3 hover:bg-slate-50 transition-colors text-left"
+                                >
+                                  <span className="text-[10.5px] font-black text-slate-400 w-6 shrink-0">{dim.dimension}</span>
+                                  <span className="flex-1 text-[12px] font-semibold text-slate-700">{dim.label}</span>
+                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${ratingColors[dim.rating]}`}>{dim.rating}</span>
+                                  {dim.notes
+                                    ? (isExpanded ? <ChevronUp className="w-3.5 h-3.5 text-slate-400 shrink-0" /> : <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />)
+                                    : <ChevronRight className="w-3.5 h-3.5 text-slate-200 shrink-0" />
+                                  }
+                                </button>
+                                {isExpanded && dim.notes && (
+                                  <div className="px-3.5 pb-2.5 pt-0 border-t border-slate-100">
+                                    <p className="text-[11.5px] text-slate-600 leading-relaxed mt-2">{dim.notes}</p>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Narrative */}
+                      {source.narrative && (
+                        <div className="mt-4 p-3.5 rounded-2xl bg-teal-50 border border-teal-100">
+                          <div className="flex items-center gap-1.5 mb-1.5">
+                            <BookOpen className="w-3.5 h-3.5 text-teal-600" />
+                            <span className="text-[10px] font-black uppercase tracking-widest text-teal-700">AI Narrative</span>
+                          </div>
+                          <p className="text-[12px] text-slate-700 leading-relaxed">{source.narrative}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Integrated read */}
+              {user.leadershipDNA.integratedRead && (
+                <div className="flex items-start gap-2.5 p-4 rounded-2xl bg-indigo-50 border border-indigo-100">
+                  <TrendingUp className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" />
+                  <p className="text-[11.5px] text-indigo-800 leading-relaxed">{user.leadershipDNA.integratedRead}</p>
+                </div>
+              )}
+            </div>
           )}
         </div>
       )}
