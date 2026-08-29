@@ -671,6 +671,18 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
   const [aiSuggestions, setAiSuggestions] = useState<KpiDefinition[] | null>(null);
   const [selectedSuggestions, setSelectedSuggestions] = useState<Set<string>>(new Set());
 
+  // Fix 3: inline editing state for AI suggestions
+  const [editingSuggId, setEditingSuggId] = useState<string | null>(null);
+  const [editingSuggDraft, setEditingSuggDraft] = useState<KpiDefinition | null>(null);
+
+  // Fix 4: last-generated AI suggestions cache (persisted to localStorage)
+  const [savedAiSuggestions, setSavedAiSuggestions] = useState<KpiDefinition[] | null>(() => {
+    try {
+      const raw = localStorage.getItem(`${storageKey}_aisuggestions`);
+      return raw ? (JSON.parse(raw) as KpiDefinition[]) : null;
+    } catch { return null; }
+  });
+
   // ── Add Goal modal ───────────────────────────────────────────────────────
   const [showAddForm, setShowAddForm] = useState(false);
   const [addForm, setAddForm] = useState(DEFAULT_ADD_FORM);
@@ -736,8 +748,16 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
     const adopted = aiSuggestions.filter((s) => selectedSuggestions.has(s.id));
     const newActuals: ActualsMap = {};
     adopted.forEach((k) => { newActuals[k.id] = BLANK_ACTUALS(k.id); });
-    setKpiDefs((prev) => [...prev, ...adopted]);
-    setActuals((prev) => ({ ...prev, ...newActuals }));
+    const nextKpiDefs = [...kpiDefs, ...adopted];
+    const nextActuals = { ...actuals, ...newActuals };
+    // Fix 2: write synchronously so data survives fast navigation
+    try { localStorage.setItem(`${storageKey}_kpidefs`, JSON.stringify(nextKpiDefs)); } catch {}
+    try { localStorage.setItem(`${storageKey}_actuals`, JSON.stringify(nextActuals)); } catch {}
+    // Fix 4: cache generated suggestions so user can return to them
+    try { localStorage.setItem(`${storageKey}_aisuggestions`, JSON.stringify(aiSuggestions)); } catch {}
+    setSavedAiSuggestions(aiSuggestions);
+    setKpiDefs(nextKpiDefs);
+    setActuals(nextActuals);
     setAiSuggestions(null);
   };
 
@@ -759,8 +779,13 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
       higherIsBetter: addForm.higherIsBetter,
       periodTargets: distributeTarget(target),
     };
-    setKpiDefs((prev) => [...prev, newKpi]);
-    setActuals((prev) => ({ ...prev, [newKpi.id]: BLANK_ACTUALS(newKpi.id) }));
+    // Fix 2: write synchronously so data survives fast navigation
+    const nextKpiDefs = [...kpiDefs, newKpi];
+    const nextActuals = { ...actuals, [newKpi.id]: BLANK_ACTUALS(newKpi.id) };
+    try { localStorage.setItem(`${storageKey}_kpidefs`, JSON.stringify(nextKpiDefs)); } catch {}
+    try { localStorage.setItem(`${storageKey}_actuals`, JSON.stringify(nextActuals)); } catch {}
+    setKpiDefs(nextKpiDefs);
+    setActuals(nextActuals);
     setAddForm(DEFAULT_ADD_FORM);
     setAddFormError('');
     setShowAddForm(false);
@@ -786,7 +811,10 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
       const raw = editDraft[p];
       updated[p] = { value: raw !== '' && !isNaN(Number(raw)) ? Number(raw) : null, comment: editComments[p] || undefined };
     });
-    setActuals((prev) => ({ ...prev, [editingKpi.id]: updated }));
+    // Fix 2: write synchronously so data survives fast navigation
+    const nextActuals = { ...actuals, [editingKpi.id]: updated };
+    try { localStorage.setItem(`${storageKey}_actuals`, JSON.stringify(nextActuals)); } catch {}
+    setActuals(nextActuals);
     setEditingKpi(null);
   };
 
@@ -794,12 +822,14 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
 
   const handleDeleteKpi = (kpiId: string) => {
     if (!window.confirm('Delete this Goal? This action cannot be undone.')) return;
-    setKpiDefs((prev) => prev.filter((k) => k.id !== kpiId));
-    setActuals((prev) => {
-      const next = { ...prev };
-      delete next[kpiId];
-      return next;
-    });
+    const nextKpiDefs = kpiDefs.filter((k) => k.id !== kpiId);
+    const nextActuals = { ...actuals };
+    delete nextActuals[kpiId];
+    // Fix 2: write synchronously so data survives fast navigation
+    try { localStorage.setItem(`${storageKey}_kpidefs`, JSON.stringify(nextKpiDefs)); } catch {}
+    try { localStorage.setItem(`${storageKey}_actuals`, JSON.stringify(nextActuals)); } catch {}
+    setKpiDefs(nextKpiDefs);
+    setActuals(nextActuals);
   };
 
   // ── AI Loading Overlay ─────────────────────────────────────────────────────
@@ -863,22 +893,146 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
                   <div className="space-y-2">
                     {group.map((s) => {
                       const checked = selectedSuggestions.has(s.id);
+                      const isEditing = editingSuggId === s.id;
+                      const toggleCheck = () =>
+                        setSelectedSuggestions((prev) => {
+                          const next = new Set(prev);
+                          if (next.has(s.id)) next.delete(s.id);
+                          else next.add(s.id);
+                          return next;
+                        });
+
+                      // Fix 3: inline edit form
+                      if (isEditing && editingSuggDraft) {
+                        const d = editingSuggDraft;
+                        const setD = (patch: Partial<KpiDefinition>) =>
+                          setEditingSuggDraft((prev) => prev ? { ...prev, ...patch } : prev);
+                        return (
+                          <div key={s.id} className="p-3.5 rounded-xl border border-indigo-300 bg-indigo-50/50 space-y-2.5">
+                            <div className="flex items-start gap-3">
+                              <input type="checkbox" checked={checked} onChange={toggleCheck} className="mt-1 accent-indigo-600" />
+                              <div className="flex-1 space-y-2">
+                                {/* Name */}
+                                <input
+                                  type="text"
+                                  value={d.name}
+                                  onChange={(e) => setD({ name: e.target.value })}
+                                  placeholder="Goal name"
+                                  className="w-full text-xs font-bold border border-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                                />
+                                {/* Description */}
+                                <textarea
+                                  value={d.description || ''}
+                                  onChange={(e) => setD({ description: e.target.value })}
+                                  rows={2}
+                                  placeholder="Description..."
+                                  className="w-full text-[11px] border border-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-none"
+                                />
+                                {/* Perspective / Weight / UOM */}
+                                <div className="grid grid-cols-3 gap-2">
+                                  <div>
+                                    <p className="text-[9px] font-bold uppercase text-slate-400 mb-1">Perspective</p>
+                                    <select
+                                      value={d.perspective}
+                                      onChange={(e) => setD({ perspective: e.target.value as Perspective })}
+                                      className="w-full text-[11px] border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                                    >
+                                      {PERSPECTIVE_ORDER.map((p) => <option key={p} value={p}>{p}</option>)}
+                                    </select>
+                                  </div>
+                                  <div>
+                                    <p className="text-[9px] font-bold uppercase text-slate-400 mb-1">Weight</p>
+                                    <input
+                                      type="number"
+                                      value={d.weight}
+                                      onChange={(e) => setD({ weight: Number(e.target.value) })}
+                                      className="w-full text-[11px] border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                                    />
+                                  </div>
+                                  <div>
+                                    <p className="text-[9px] font-bold uppercase text-slate-400 mb-1">UOM</p>
+                                    <input
+                                      type="text"
+                                      value={d.uom}
+                                      onChange={(e) => setD({ uom: e.target.value })}
+                                      className="w-full text-[11px] border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                                    />
+                                  </div>
+                                </div>
+                                {/* Target / Aggregation / Direction */}
+                                <div className="grid grid-cols-3 gap-2 items-end">
+                                  <div>
+                                    <p className="text-[9px] font-bold uppercase text-slate-400 mb-1">Target (per period)</p>
+                                    <input
+                                      type="number"
+                                      step="any"
+                                      value={d.periodTargets.Jan}
+                                      onChange={(e) => {
+                                        const v = Number(e.target.value);
+                                        const periodTargets = { ...d.periodTargets };
+                                        PERIODS.forEach((p) => { periodTargets[p] = v; });
+                                        setD({ periodTargets });
+                                      }}
+                                      className="w-full text-[11px] border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                                    />
+                                  </div>
+                                  <div>
+                                    <p className="text-[9px] font-bold uppercase text-slate-400 mb-1">Aggregation</p>
+                                    <select
+                                      value={d.targetType}
+                                      onChange={(e) => setD({ targetType: e.target.value as TargetType })}
+                                      className="w-full text-[11px] border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                                    >
+                                      <option value="Average">Average</option>
+                                      <option value="Sum">Sum</option>
+                                      <option value="Last">Last</option>
+                                    </select>
+                                  </div>
+                                  <div>
+                                    <p className="text-[9px] font-bold uppercase text-slate-400 mb-1">Direction</p>
+                                    <button
+                                      onClick={() => setD({ higherIsBetter: !d.higherIsBetter })}
+                                      className={`w-full text-[10px] font-bold rounded-lg px-2 py-1.5 border transition-colors cursor-pointer ${d.higherIsBetter ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-red-50 border-red-200 text-red-700'}`}
+                                    >
+                                      {d.higherIsBetter ? '↑ Higher Better' : '↓ Lower Better'}
+                                    </button>
+                                  </div>
+                                </div>
+                                {/* Actions */}
+                                <div className="flex justify-end gap-2 pt-1">
+                                  <button
+                                    onClick={() => { setEditingSuggId(null); setEditingSuggDraft(null); }}
+                                    className="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-[11px] font-bold hover:bg-slate-200 transition-colors cursor-pointer"
+                                  >
+                                    Cancel
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setAiSuggestions((prev) => prev ? prev.map((x) => x.id === s.id ? editingSuggDraft! : x) : prev);
+                                      setEditingSuggId(null);
+                                      setEditingSuggDraft(null);
+                                    }}
+                                    className="px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-[11px] font-bold hover:bg-indigo-700 transition-colors cursor-pointer"
+                                  >
+                                    Save Changes
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      // Read-only row with Edit button
                       return (
-                        <label
+                        <div
                           key={s.id}
-                          className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${checked ? 'border-indigo-300 bg-indigo-50/50' : 'border-slate-100 bg-slate-50 hover:border-slate-200'}`}
+                          className={`flex items-start gap-3 p-3.5 rounded-xl border transition-all ${checked ? 'border-indigo-300 bg-indigo-50/50' : 'border-slate-100 bg-slate-50 hover:border-slate-200'}`}
                         >
                           <input
                             type="checkbox"
                             checked={checked}
-                            onChange={() => {
-                              setSelectedSuggestions((prev) => {
-                                const next = new Set(prev);
-                                if (next.has(s.id)) next.delete(s.id);
-                                else next.add(s.id);
-                                return next;
-                              });
-                            }}
+                            onChange={toggleCheck}
                             className="mt-0.5 accent-indigo-600"
                           />
                           <div className="flex-1 min-w-0">
@@ -895,7 +1049,14 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
                               Target: <span className="font-bold">{s.periodTargets.Jan.toFixed(1)}</span> {s.uom} per period &nbsp;·&nbsp; {s.targetType}
                             </p>
                           </div>
-                        </label>
+                          <button
+                            onClick={() => { setEditingSuggId(s.id); setEditingSuggDraft(s); }}
+                            className="shrink-0 p-1.5 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                            title="Edit suggestion"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       );
                     })}
                   </div>
@@ -1019,6 +1180,16 @@ export const MyGoalView: React.FC<MyGoalViewProps> = ({ currentUser }) => {
               <Sparkles className="w-3.5 h-3.5" />
               Generate AI
             </button>
+            {/* Fix 4: Back to AI Suggestions */}
+            {savedAiSuggestions && (
+              <button
+                onClick={() => setAiSuggestions(savedAiSuggestions)}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/20 border border-white/30 text-white text-xs font-bold hover:bg-white/30 transition-colors cursor-pointer"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                Back to AI
+              </button>
+            )}
             {/* Period Selector */}
             <div className="relative">
               <select
@@ -1489,16 +1660,15 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({ form, error, onChange, onSa
   const set = (k: keyof typeof DEFAULT_ADD_FORM, v: any) => onChange({ ...form, [k]: v });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-start justify-between gap-4 shrink-0">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-500">Manual Entry</p>
-            <h3 className="text-sm font-black text-slate-900 mt-0.5">Add Goal</h3>
-          </div>
-          <button onClick={onClose} className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 cursor-pointer"><X className="w-4 h-4" /></button>
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="px-6 py-4 border-b border-slate-100 flex items-start justify-between gap-4">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-500">Manual Entry</p>
+          <h3 className="text-sm font-black text-slate-900 mt-0.5">Add Goal</h3>
         </div>
-        <div className="overflow-y-auto flex-1 px-6 py-5 space-y-4">
+        <button onClick={onClose} className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 cursor-pointer"><X className="w-4 h-4" /></button>
+      </div>
+      <div className="px-6 py-5 space-y-4">
           {/* Name */}
           <div>
             <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Goal Name <span className="text-red-500">*</span></label>
@@ -1615,6 +1785,5 @@ const AddGoalModal: React.FC<AddGoalModalProps> = ({ form, error, onChange, onSa
           </button>
         </div>
       </div>
-    </div>
   );
 };
