@@ -63,6 +63,52 @@ export interface TalentCommitteeRecord {
   notes: string;
 }
 
+export interface KPIRecord {
+  year: string;
+  kpiScore: number;    // 0–100
+  patScore?: number;   // Performance Appraisal Target, 0–100
+  rating: string;      // e.g. "Sangat Baik", "Outstanding"
+  notes?: string;
+}
+
+export interface SuccessorRecord {
+  positionName: string;
+  businessUnit: string;
+  category?: string;        // "Within" | "Across" | "External"
+  incumbentName: string;
+  incumbentPS?: string;
+  successorName: string;
+  successorPS?: string;
+  readinessScore: number;   // 0–100
+  readinessLabel?: string;
+  status?: string;
+  hasGrowCard?: boolean;
+  notes?: string;
+}
+
+export interface CareerChatSection {
+  title: string;
+  content: string;
+}
+
+export interface CareerChatInsight {
+  source?: string;
+  generatedDate: string;
+  chatDate: string;
+  chatCount?: number;
+  aiSummary: {
+    strengths: string[];
+    opportunities: string[];
+    aspirations: string[];
+    recommendedInterventions: string[];
+  };
+  sections: CareerChatSection[];
+  developmentPlanIndividual?: string[];
+  developmentPlanTeam?: string[];
+  willingnessToMentor?: string;
+  additionalNotes?: string;
+}
+
 export interface UserProfile {
   id: string;
   employeeId: string;
@@ -95,6 +141,9 @@ export interface UserProfile {
   successorFor?: SuccessorEntry[];
   performanceRating?: 1 | 2 | 3 | 4;
   potentialRating?: 1 | 2 | 3;
+  kpiHistory?: KPIRecord[];
+  successorRecords?: SuccessorRecord[];
+  careerChatInsight?: CareerChatInsight;
   // Extended profile fields
   personnelNumber?: string;
   globalId?: string;

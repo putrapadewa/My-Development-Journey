@@ -75,6 +75,86 @@ export const INITIAL_USER_PROFILE: UserProfile = {
     { cycle: '2025 Year-End Committee', calibratedAssessment: 'Exceeds Expectations (High Potential Top 5%)', readinessRating: 'Ready in 6 - 12 Months', notes: 'Strong technical delivery. Recommended to sharpen executive presence and Boardroom persuasion for Head of Enterprise Architecture transition.' },
     { cycle: '2025 Mid-Year Review', calibratedAssessment: 'Consistently Strong Performer', readinessRating: 'High Potential Track', notes: 'Commended for leading the enterprise AI vector database standardization.' },
   ],
+  // Career journey fields
+  careerPaths: [
+    { position: 'Head of Enterprise Architecture', businessUnit: 'Technology Strategy Office', readinessScore: 78, targetYear: '2026' },
+    { position: 'VP of Engineering & Architecture', businessUnit: 'Digital Transformation BU', readinessScore: 52, targetYear: '2028' },
+  ],
+  isSuccessor: true,
+  successorFor: [
+    { position: 'VP of Engineering & Architecture', businessUnit: 'Digital Transformation BU', readinessScore: 78 },
+  ],
+  performanceRating: 3,
+  potentialRating: 3,
+  kpiHistory: [
+    { year: '2024', kpiScore: 87, patScore: 92, rating: 'Exceeds Expectations', notes: 'Q4 delivery of enterprise AI blueprint ahead of schedule.' },
+    { year: '2025', kpiScore: 91, patScore: 95, rating: 'Outstanding', notes: 'Cloud cost optimization saving $420K; zero critical production incidents.' },
+    { year: '2026 (Mid-Year)', kpiScore: 88, patScore: 90, rating: 'Exceeds Expectations', notes: 'On track — GenAI infrastructure delivery 85% complete.' },
+  ],
+  successorRecords: [
+    {
+      positionName: 'Lead Cloud Solutions Architect & Tech Lead',
+      businessUnit: 'Digital Transformation BU',
+      category: 'Within',
+      incumbentName: 'Christina',
+      incumbentPS: 'L5',
+      successorName: 'Budi Santoso',
+      successorPS: 'L4',
+      readinessScore: 65,
+      readinessLabel: 'Ready in 1–2 Thn',
+      status: 'In Development',
+      hasGrowCard: true,
+      notes: 'Strong technical delivery; needs leadership presence & client-facing exposure.',
+    },
+  ],
+  careerChatInsight: {
+    source: 'myCareer+ · Career Chat Insights',
+    generatedDate: '29 Aug 2026',
+    chatDate: '21 Aug 2026',
+    chatCount: 10,
+    aiSummary: {
+      strengths: [
+        'Architects enterprise systems at scale (45M daily transactions) with zero critical incidents',
+        'Strong cross-functional stakeholder management and technical storytelling',
+        'Proactively drives FinOps discipline — delivered $420K annual infrastructure savings',
+      ],
+      opportunities: [
+        'Executive presence and C-suite presentation delivery needs structured development',
+        'Delegation patterns still lean toward hands-on delivery; scaling through others is a growth area',
+        'Cross-BU influence without direct authority requires broader organizational credibility',
+      ],
+      aspirations: [
+        'Targeting Head of Enterprise Architecture within 12 months',
+        'Long-term: VP of Engineering & Architecture within 3–5 years',
+        'Interested in leading the company-wide GenAI governance framework',
+      ],
+      recommendedInterventions: [
+        'C-suite shadowing program to accelerate executive presence development',
+        'Sponsor a cross-BU architecture committee leadership role',
+        'Enroll in structured executive communication and persuasion program (H2 2026)',
+      ],
+    },
+    sections: [
+      { title: '1. Career Journey & Leadership Experience', content: 'With TechConnect since 2021. Led multiple landmark infrastructure programs, most recently architecting the enterprise microservices platform processing 45M daily transactions. Recognized as a top-5% technical contributor across the engineering community and selected to represent the division at the national cloud architecture working group.' },
+      { title: '2. Personal Aspirations & Career Goals', content: 'Actively targeting the Head of Enterprise Architecture role within 12 months, and VP of Engineering within 3–5 years. Motivated to shape the company\'s GenAI governance roadmap and build its next-generation platform strategy. Career growth must retain meaningful technical depth alongside leadership scope.' },
+      { title: '3. Key Skills & Development Areas', content: 'Exceptional at translating complex distributed-systems challenges into elegant architectural solutions. Primary development area: executive communication — structuring concise, persuasive presentations for C-suite and board audiences. Needs exposure to influence-without-authority scenarios across business units to prepare for VP-level scope.' },
+      { title: '4. Engagement & Motivation Factors', content: 'Deeply motivated by technical depth, system impact, and mentoring junior architects. High ownership mindset; thrives in ambiguous, high-stakes delivery environments. Recognition through conference speaking or external thought-leadership opportunities would be highly energizing.' },
+      { title: '5. Organizational & Team Dynamics', content: 'Viewed as a go-to technical authority within the BU. Collaborative and generous with knowledge sharing. Currently onboarding two junior architects with genuine investment in their growth. Team morale is high under her leadership and delivery cadence is consistent.' },
+      { title: '6. Push & Pull Factors for Retention', content: 'Pull: intellectual challenge, clear growth trajectory, impactful technical mandate. Push risk: if progression to Head of Architecture is delayed beyond 18 months without a clear rationale, retention risk increases significantly. Competitive market demand for her profile is very high.' },
+      { title: '7. Openness to Mobility & Career Shifts', content: 'Open to cross-BU architecture leadership exposure. Expressed interest in representing TechConnect at industry standards bodies. Not interested in a full pivot to pure management without ongoing technical depth — a hybrid technical-leadership role is ideal.' },
+      { title: '8. Contributions to Talent Development & Succession Planning', content: 'Actively developing Budi Santoso as her identified technical successor — weekly architectural guidance and sponsorship for external certification. Assessed successor readiness: 1–2 years with targeted leadership development. Also informally mentoring two junior cloud engineers.' },
+      { title: '9. Vision for the Company & Leadership Perspective', content: 'Believes TechConnect\'s competitive advantage lies in its ability to move faster than incumbents on AI-native architecture. Advocates for a centralized GenAI Center of Excellence to prevent fragmented platform investments across BUs, and has drafted an initial governance proposal.' },
+    ],
+    developmentPlanIndividual: [
+      'Executive communication & presentation — structuring and delivering concise, persuasive decks for C-suite audiences. Enroll in executive communication program (H2 2026).',
+      'Cross-BU influence leadership — sponsor role in architecture governance committee to build organizational credibility without direct authority (Q4 2026).',
+    ],
+    developmentPlanTeam: [
+      'Developing Budi Santoso as named technical successor — targeted leadership presence coaching and client-facing exposure to close readiness gap (target: ready in 1–2 years).',
+    ],
+    willingnessToMentor: 'Demonstrated and active — mentoring Budi Santoso day-to-day and onboarding two junior architects. Would benefit from a formal mentorship recognition program.',
+    additionalNotes: 'High flight risk if progression opportunity is delayed beyond 18 months. External market demand for her profile is significant. Recommend fast-tracking the architecture committee sponsorship and confirming the Head of Architecture succession timeline by Q1 2027.',
+  },
 };
 
 export const INITIAL_SKILLS: SkillItem[] = [
