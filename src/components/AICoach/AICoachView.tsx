@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   Sparkles, Send, BookOpen, CheckCircle2,
   ChevronDown, ChevronUp, Plus, RefreshCw, Zap, Lock,
-  Mic, MicOff, Globe, ArrowRight, X, Edit3,
+  Mic, Square, Globe, ArrowRight, X, Edit3,
   Trophy, History,
 } from 'lucide-react';
 import {
@@ -60,8 +60,7 @@ export const AICoachView: React.FC<AICoachViewProps> = ({
 
   const wizardRef = useRef<HTMLDivElement>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
+  const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -81,27 +80,33 @@ export const AICoachView: React.FC<AICoachViewProps> = ({
       ? customTopic
       : topicSuggestions.find(t => t.id === selectedTopic)?.label ?? '';
 
-  // ── Audio recording ──────────────────────────────────────────────────────
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      audioChunksRef.current = [];
-      const recorder = new MediaRecorder(stream);
-      recorder.ondataavailable = (e) => audioChunksRef.current.push(e.data);
-      recorder.onstop = () => {
-        stream.getTracks().forEach(t => t.stop());
-        setInputMessage(language === 'id' ? '[Pesan Suara]' : '[Voice Message]');
-      };
-      recorder.start();
-      mediaRecorderRef.current = recorder;
-      setIsRecording(true);
-    } catch {
-      alert(language === 'id' ? 'Izin mikrofon diperlukan.' : 'Microphone permission required.');
+  // ── Voice recording (SpeechRecognition – live transcript) ───────────────
+  const startRecording = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert(language === 'id' ? 'Browser Anda tidak mendukung speech recognition.' : 'Your browser does not support speech recognition.');
+      return;
     }
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = language === 'id' ? 'id-ID' : 'en-US';
+    recognition.onresult = (event: any) => {
+      let transcript = '';
+      for (let i = 0; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      setInputMessage(transcript);
+    };
+    recognition.onerror = () => { setIsRecording(false); };
+    recognition.onend = () => { setIsRecording(false); };
+    recognition.start();
+    recognitionRef.current = recognition;
+    setIsRecording(true);
   };
 
   const stopRecording = () => {
-    mediaRecorderRef.current?.stop();
+    recognitionRef.current?.stop();
     setIsRecording(false);
   };
 
@@ -525,7 +530,7 @@ export const AICoachView: React.FC<AICoachViewProps> = ({
                     </div>
                     <div>
                       <div className="text-xs font-bold text-slate-900">
-                        {mode === 'COACH' ? 'MDJ AI Coach' : 'MDJ AI Mentor'}
+                        {mode === 'COACH' ? 'AI Coach' : 'AI Mentor'}
                         <span className="ml-2 text-[10px] font-normal text-indigo-500 truncate max-w-[120px] inline-block align-bottom">{effectiveTopic}</span>
                       </div>
                       <div className="text-[10px] text-emerald-600 font-bold flex items-center gap-1">
@@ -563,7 +568,7 @@ export const AICoachView: React.FC<AICoachViewProps> = ({
                             : 'bg-slate-100/90 text-slate-900 border border-slate-200 rounded-tl-xs'
                         }`}>
                           <div className="flex items-center justify-between gap-2 text-[10px] opacity-70 font-semibold mb-1.5">
-                            <span>{isUser ? currentUser.name : (mode === 'COACH' ? 'MDJ AI Coach' : 'MDJ AI Mentor')}</span>
+                            <span>{isUser ? currentUser.name : (mode === 'COACH' ? 'AI Coach' : 'AI Mentor')}</span>
                             <span>{msg.timestamp}</span>
                           </div>
                           <div className="whitespace-pre-line">{msg.content}</div>
@@ -598,7 +603,7 @@ export const AICoachView: React.FC<AICoachViewProps> = ({
                           : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200'
                       }`}
                     >
-                      {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                      {isRecording ? <Square className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
                     </button>
                     <input
                       type="text"

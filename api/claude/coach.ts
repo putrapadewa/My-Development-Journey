@@ -30,6 +30,7 @@ ${isCoach
   ? '- Coach mode: Ask powerful clarifying questions for self-discovery. Progress G -> R -> O -> W.'
   : '- Mentor mode: Provide practical, seasoned enterprise advice and actionable frameworks.'
 }
+- IMPORTANT: Ask only ONE question per response. Never ask multiple questions in one message.
 - Tone: Professional, encouraging, concise (2-3 paragraphs max).
 - If concrete actions emerge at W stage, extract key reflections and IDP commitments.
 
