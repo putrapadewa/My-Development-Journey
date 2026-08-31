@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { MapPin, Layers, Sparkles, ClipboardList, History, TrendingUp, Target, BarChart3 } from 'lucide-react';
 import {
   INITIAL_USER_PROFILE,
   INITIAL_IDP,
@@ -217,69 +216,6 @@ export function App() {
           onNavigateToProfile={handleNavigateToProfile}
         />
       </div>
-
-      {/* 3a. My Development Sub-tabs */}
-      {(activeTab === 'journey' || activeTab === 'skills' || activeTab === 'coach' || activeTab === 'assessment' || activeTab === 'devhistory') && (
-        <div className="bg-white border-b border-slate-200 mt-4">
-          <div className="w-full px-3 sm:px-6 lg:px-8 xl:px-10 2xl:px-12">
-            <div className="flex items-center gap-1 py-2 overflow-x-auto no-scrollbar">
-              {[
-                { id: 'journey' as const, label: 'My Development Plan', icon: MapPin },
-                { id: 'skills' as const, label: 'My Skill', icon: Layers },
-                { id: 'assessment' as const, label: 'My Assessment', icon: ClipboardList },
-                { id: 'devhistory' as const, label: 'My Dev History', icon: History },
-                { id: 'coach' as const, label: 'My AI Coach', icon: Sparkles },
-              ].map(({ id, label, icon: Icon }) => {
-                const isActive = activeTab === id;
-                return (
-                  <button
-                    key={id}
-                    onClick={() => setActiveTab(id)}
-                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                      isActive
-                        ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
-                        : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100 border border-transparent'
-                    }`}
-                  >
-                    <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-indigo-500' : 'text-slate-400'}`} />
-                    <span>{label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 3b. My Growth & Career Sub-tabs */}
-      {(activeTab === 'growcard' || activeTab === 'career') && (
-        <div className="bg-white border-b border-slate-200 mt-4">
-          <div className="w-full px-3 sm:px-6 lg:px-8 xl:px-10 2xl:px-12">
-            <div className="flex items-center gap-1 py-2">
-              {[
-                { id: 'growcard' as const, label: 'My Grow Card', icon: TrendingUp },
-                { id: 'career' as const, label: 'My Career Journey', icon: BarChart3 },
-              ].map(({ id, label, icon: Icon }) => {
-                const isActive = activeTab === id;
-                return (
-                  <button
-                    key={id}
-                    onClick={() => setActiveTab(id)}
-                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                      isActive
-                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                        : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100 border border-transparent'
-                    }`}
-                  >
-                    <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-emerald-500' : 'text-slate-400'}`} />
-                    <span>{label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* 4. Main Body Container */}
       <main className="flex-1 w-full px-3 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 pt-6">
