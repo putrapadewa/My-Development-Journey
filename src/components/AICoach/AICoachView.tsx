@@ -58,19 +58,10 @@ export const AICoachView: React.FC<AICoachViewProps> = ({
   const [sessionHistory, setSessionHistory] = useState<SessionRecord[]>([]);
   const [expandedSession, setExpandedSession] = useState<string | null>(null);
 
-  const containerRef = useRef<HTMLDivElement>(null);
   const wizardRef = useRef<HTMLDivElement>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
-
-  // Auto-scroll to top of AI Coach section on mount
-  useEffect(() => {
-    const t = setTimeout(() => {
-      containerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 300);
-    return () => clearTimeout(t);
-  }, []);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -251,7 +242,7 @@ export const AICoachView: React.FC<AICoachViewProps> = ({
   const growLabels: Record<string, string> = { G: 'Goal', R: 'Reality', O: 'Options', W: 'Way Forward' };
 
   return (
-    <div ref={containerRef} className="space-y-6 pb-12">
+    <div className="space-y-6 pb-12">
 
       {/* ── Header Banner ── */}
       <div className="rounded-3xl bg-indigo-900 text-white p-6 sm:p-8 shadow-xl border border-indigo-800 relative overflow-hidden">
